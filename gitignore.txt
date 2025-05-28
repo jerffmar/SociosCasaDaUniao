@@ -1,0 +1,20 @@
+# Ambiente virtual Python
+.venv/
+
+# Arquivos de cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Banco de dados SQLite
+db.sqlite3
+
+# Arquivos de configuração do VS Code
+.vscode/
+
+# Arquivos de migração do Django (opcional manter, mas pode ignorar se desejar)
+# doadores/migrations/
+
+# Arquivos temporários do sistema operacional
+.DS_Store
+Thumbs.db
