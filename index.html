@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa da União Luz de Maria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .container {
+            background: #fff;
+            padding: 32px 28px;
+            border-radius: 18px;
+            box-shadow: 0 6px 32px rgba(37, 99, 235, 0.08), 0 1.5px 6px rgba(0,0,0,0.03);
+            width: 100%;
+            max-width: 410px;
+            text-align: center;
+            margin-top: 28px;
+        }
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+        }
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+        h1, h2 {
+            color: #2563eb;
+            margin-bottom: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 11px 12px;
+            margin-bottom: 15px;
+            border: 1.5px solid #c7d2fe;
+            border-radius: 7px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background: #f1f5f9;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus {
+            border-color: #2563eb;
+            outline: none;
+            background: #fff;
+        }
+        button {
+            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+            color: #fff;
+            padding: 13px 0;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #1d4ed8 60%, #3b82f6 100%);
+            box-shadow: 0 4px 16px rgba(37,99,235,0.13);
+        }
+        #loginPage, #registrationPage, #donorDashboard, #pdfGenerator {
+            display: none;
+        }
+        #loginPage.active, #registrationPage.active, #donorDashboard.active, #pdfGenerator.active {
+            display: block;
+        }
+        .qr-code-container {
+            margin-top: 18px;
+        }
+        .qr-code-container img {
+            max-width: 180px;
+            height: auto;
+            border: 1px solid #e0e7ff;
+            padding: 8px;
+            background: #fff;
+            border-radius: 8px;
+        }
+        .message {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: #2563eb;
+            background: #e0e7ff;
+            border: 1.5px solid #c7d2fe;
+            font-size: 15px;
+            text-align: left;
+        }
+        .message[style*="background-color: #d4edda"] {
+            color: #15803d;
+            background: #dcfce7 !important;
+            border-color: #bbf7d0 !important;
+        }
+        .message[style*="background-color: #f8d7da"] {
+            color: #b91c1c;
+            background: #fee2e2 !important;
+            border-color: #fecaca !important;
+        }
+        .hidden {
+            display: none;
+        }
+        a#downloadPdfLink {
+            display: inline-block;
+            margin-top: 10px;
+            color: #2563eb;
+            background: #e0e7ff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #c7d2fe;
+            transition: background 0.2s;
+        }
+        a#downloadPdfLink:hover {
+            background: #dbeafe;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" style="max-width: 200px; padding: 15px; margin-bottom: 20px;">
+        <div class="logo-container">
+            <img src="Logo_CDULM_Vertical.webp" alt="Logo Casa da União Luz de Maria">
+        </div>
+    </div>
+
+    <!-- Balão de Login -->
+    <div id="loginPage" class="container active" style="margin-bottom: 18px;">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="loginEmail">Email:</label>
+            <input type="email" id="loginEmail" required>
+            <label for="loginPassword">Senha:</label>
+            <input type="password" id="loginPassword" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <button onclick="showPage('registrationPage')">Cadastre-se</button>
+        <p class="message" id="loginMessage" style="display:none;"></p>
+    </div>
+
+    <!-- Balão de Validação de Doação -->
+    <div id="tokenValidator" class="container" style="max-width: 340px; margin-bottom: 28px;">
+        <h3 style="color:#2563eb; margin-bottom:10px; font-size: 1.1rem; font-weight:600;">Validar Doação</h3>
+        <form id="validateTokenForm" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
+            <input type="text" id="tokenInput" placeholder="Token de validação" style="padding: 7px 10px; border-radius: 6px; border: 1px solid #c7d2fe; font-size: 15px;">
+            <button type="submit" style="padding: 7px 14px; border-radius: 6px; border: none; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; margin-top: 2px;">Validar</button>
+        </form>
+        <div id="tokenResult" style="display:none; margin-top: 8px; background: #e0e7ff; border: 1.5px solid #2563eb; border-radius: 8px; padding: 12px 16px; color: #1e293b; min-width: 220px; box-shadow: 0 2px 8px rgba(37,99,235,0.08);"></div>
+    </div>
+
+    <div id="registrationPage" class="container">
+        <h2>Cadastro de Doador</h2>
+        <form id="registrationForm">
+            <label for="regName">Nome Completo:</label>
+            <input type="text" id="regName" required>
+            <label for="regEmail">Email:</label>
+            <input type="email" id="regEmail" required>
+            <label for="regPassword">Senha:</label>
+            <input type="password" id="regPassword" required>
+            <label for="regConfirmPassword">Confirmar Senha:</label>
+            <input type="password" id="regConfirmPassword" required>
+            <label for="regCPF">CPF:</label>
+            <input type="text" id="regCPF" placeholder="000.000.000-00" required>
+            <label for="regPhone">Telefone:</label>
+            <input type="text" id="regPhone" placeholder="(DD) 9XXXX-XXXX">
+            <button type="submit">Cadastrar</button>
+        </form>
+        <button onclick="showPage('loginPage')">Já tem cadastro? Faça login</button>
+        <p class="message" id="registrationMessage" style="display:none;"></p>
+    </div>
+
+    <div id="donorDashboard" class="container">
+        <h2>Área do Doador</h2>
+        <p>Bem-vindo(a), <strong id="donorNameDisplay">Doador(a)</strong>!</p>
+
+        <h3>Gerar PIX para Doação</h3>
+        <form id="pixForm">
+            <label for="donationAmount">Valor da Doação (R$):</label>
+            <input type="number" id="donationAmount" min="1" step="0.01" value="10.00" required>
+            <button type="submit">Gerar QR Code PIX</button>
+        </form>
+        <div class="qr-code-container" id="qrCodeContainer">
+            <p>QR Code PIX será gerado aqui:</p>
+            <textarea id="pixPayloadText" rows="3" style="width:100%;margin-bottom:10px;" readonly class="hidden"></textarea>
+            <div id="qrCodeImage"></div>
+        </div>
+        <p class="message" id="pixMessage" style="display:none;"></p>
+
+        <h3>Gerar Documento de Doação</h3>
+        <button onclick="generateDonationDocument()">Gerar Documento PDF</button>
+        <div id="pdfOutput" class="message hidden">
+            <p>Seu documento foi gerado. Guarde o token para validação:</p>
+            <p><strong>Token de Validação:</strong> <span id="validationTokenDisplay"></span></p>
+            <a id="downloadPdfLink" href="#" download="documento_doacao.pdf" class="hidden">Baixar PDF</a>
+        </div>
+        <button onclick="showPage('loginPage'); localStorage.removeItem('loggedInUser');">Sair</button>
+    </div>
+
+    <div id="pdfGenerator" class="container">
+        <h2>Validar Documento</h2>
+        <form id="validatePdfForm">
+            <label for="validationTokenInput">Token de Validação:</label>
+            <input type="text" id="validationTokenInput" required>
+            <button type="submit">Validar</button>
+        </form>
+        <p class="message" id="validationMessage" style="display:none;"></p>
+        <button onclick="showPage('loginPage')">Voltar ao Login</button>
+    </div>
+
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Store registered users (in a real app, this would be a database)
+        let users = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+        let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        let generatedDocuments = JSON.parse(localStorage.getItem('generatedDocuments')) || {};
+
+        let pixData = null;
+
+        // Carrega o pix.json ao iniciar a página
+        fetch('pix.json')
+            .then(response => response.json())
+            .then(data => { pixData = data; })
+            .catch(() => { pixData = null; });
+
+        // Function to show/hide pages
+        function showPage(pageId) {
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('registrationPage').classList.remove('active');
+            document.getElementById('donorDashboard').classList.remove('active');
+            document.getElementById('pdfGenerator').classList.remove('active');
+            document.getElementById(pageId).classList.add('active');
+
+            // Specific actions when showing pages
+            if (pageId === 'donorDashboard' && loggedInUser) {
+                document.getElementById('donorNameDisplay').innerText = loggedInUser.name;
+            }
+        }
+
+        // Handle Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const loginMessage = document.getElementById('loginMessage');
+
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                loggedInUser = user;
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                loginMessage.style.display = 'none';
+                showPage('donorDashboard');
+            } else {
+                loginMessage.innerText = 'Email ou senha inválidos.';
+                loginMessage.style.display = 'block';
+            }
+        });
+
+        // Handle Registration Form Submission
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const cpf = document.getElementById('regCPF').value;
+            const phone = document.getElementById('regPhone').value;
+            const registrationMessage = document.getElementById('registrationMessage');
+
+            if (password !== confirmPassword) {
+                registrationMessage.innerText = 'As senhas não coincidem.';
+                registrationMessage.style.display = 'block';
+                return;
+            }
+
+            if (users.some(u => u.email === email)) {
+                registrationMessage.innerText = 'Este email já está cadastrado.';
+                registrationMessage.style.display = 'block';
+                return;
+            }
+
+            const newUser = { name, email, password, cpf, phone };
+            users.push(newUser);
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+            registrationMessage.innerText = 'Cadastro realizado com sucesso! Você pode fazer login agora.';
+            registrationMessage.style.display = 'block';
+            document.getElementById('registrationForm').reset();
+            setTimeout(() => {
+                showPage('loginPage');
+                registrationMessage.style.display = 'none';
+            }, 2000);
+        });
+
+        function emv(id, valor) {
+            const tamanho = valor.length.toString().padStart(2, '0');
+            return `${id}${tamanho}${valor}`;
+        }
+
+        // Função para montar o payload PIX conforme o padrão solicitado
+        function montarPixPayload(valor) {
+            if (!pixData) return '';
+            const valorFormatado = Number(valor).toFixed(2);
+
+            // Use valores mínimos conforme seu exemplo
+            const payloadFormatado =
+                '000201' +
+                emv('26',
+                    emv('00', 'BR.GOV.BCB.PIX') +
+                    emv('01', pixData["CHAVE PIX"])
+                ) +
+                '52040000' +
+                '5303986' +
+                emv('54', valorFormatado) +
+                '5802BR' +
+                emv('59', 'N') + // Nome mínimo
+                emv('60', 'C') + // Cidade mínima
+                emv('62',
+                    emv('05', pixData["TXID"])
+                );
+
+            // CRC16 função
+            function crc16(str) {
+                let crc = 0xFFFF;
+                for (let c = 0; c < str.length; c++) {
+                    crc ^= str.charCodeAt(c) << 8;
+                    for (let i = 0; i < 8; i++) {
+                        if ((crc & 0x8000) !== 0) {
+                            crc = (crc << 1) ^ 0x1021;
+                        } else {
+                            crc = crc << 1;
+                        }
+                        crc &= 0xFFFF;
+                    }
+                }
+                return crc.toString(16).toUpperCase().padStart(4, '0');
+            }
+
+            const semCRC = payloadFormatado + '6304';
+            const crc = crc16(semCRC);
+
+            return semCRC + crc;
+        }
+
+        // Substitua o evento do formulário PIX:
+        document.getElementById('pixForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const donationAmount = parseFloat(document.getElementById('donationAmount').value);
+            const pixMessage = document.getElementById('pixMessage');
+            const pixPayloadText = document.getElementById('pixPayloadText');
+            const qrCodeImage = document.getElementById('qrCodeImage');
+
+            if (isNaN(donationAmount) || donationAmount <= 0) {
+                pixMessage.innerText = 'Por favor, insira um valor de doação válido.';
+                pixMessage.style.display = 'block';
+                pixPayloadText.classList.add('hidden');
+                qrCodeImage.innerHTML = '';
+                return;
+            }
+
+            if (!pixData) {
+                pixMessage.innerText = 'Erro ao carregar dados do PIX.';
+                pixMessage.style.display = 'block';
+                pixPayloadText.classList.add('hidden');
+                qrCodeImage.innerHTML = '';
+                return;
+            }
+
+            // Monta o payload
+            const payload = montarPixPayload(donationAmount);
+
+            // Exibe o payload na caixa de texto
+            pixPayloadText.value = payload;
+            pixPayloadText.classList.remove('hidden');
+            pixMessage.style.display = 'none';
+
+            // Gera o QR Code
+            qrCodeImage.innerHTML = '';
+            new QRCode(qrCodeImage, {
+                text: payload,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        });
+
+        // Generate Donation Document (PDF)
+        async function generateDonationDocument() {
+            if (!loggedInUser) {
+                alert('Você precisa estar logado para gerar um documento.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            const docId = `doc_${Date.now()}`;
+
+            doc.setFontSize(18);
+            doc.text("Recibo de Doação - Casa da União Luz de Maria", 105, 20, null, null, "center");
+
+            doc.setFontSize(12);
+            doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 40);
+            doc.text(`Doador(a): ${loggedInUser.name}`, 20, 50);
+            doc.text(`Email: ${loggedInUser.email}`, 20, 60);
+            doc.text(`CPF: ${loggedInUser.cpf}`, 20, 70);
+            doc.text(`Valor Estimado da Doação: R$ ${parseFloat(document.getElementById('donationAmount').value || 0).toFixed(2)}`, 20, 80);
+            doc.text(`Este documento atesta a doação para a Casa da União Luz de Maria.`, 20, 100);
+            doc.text(`Agradecemos imensamente sua contribuição!`, 20, 110);
+
+            doc.setFontSize(10);
+            doc.text(`Token de Validação: ${token}`, 20, 130);
+            doc.text(`ID do Documento: ${docId}`, 20, 140);
+
+            const pdfOutputDiv = document.getElementById('pdfOutput');
+            const validationTokenDisplay = document.getElementById('validationTokenDisplay');
+            const downloadPdfLink = document.getElementById('downloadPdfLink');
+
+            validationTokenDisplay.innerText = token;
+            downloadPdfLink.href = doc.output('bloburl'); // Get a URL for the PDF
+            downloadPdfLink.classList.remove('hidden');
+            pdfOutputDiv.classList.remove('hidden');
+
+            // Store the generated document and its token (for simulation)
+            generatedDocuments[token] = {
+                id: docId,
+                donor: loggedInUser.name,
+                email: loggedInUser.email,
+                date: new Date().toISOString(),
+                amount: parseFloat(document.getElementById('donationAmount').value || 0).toFixed(2)
+            };
+            localStorage.setItem('generatedDocuments', JSON.stringify(generatedDocuments));
+
+            alert('Documento PDF gerado com sucesso! Salve seu token de validação.');
+        }
+
+        // Validate PDF Token
+        document.getElementById('validatePdfForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const tokenInput = document.getElementById('validationTokenInput').value;
+            const validationMessage = document.getElementById('validationMessage');
+
+            const foundDoc = generatedDocuments[tokenInput];
+
+            if (foundDoc) {
+                validationMessage.innerText = `Documento Válido!\n
+                ID: ${foundDoc.id}\n
+                Doador: ${foundDoc.donor}\n
+                Email: ${foundDoc.email}\n
+                Data: ${new Date(foundDoc.date).toLocaleDateString()}\n
+                Valor Estimado: R$ ${foundDoc.amount}`;
+                validationMessage.style.backgroundColor = '#d4edda';
+                validationMessage.style.borderColor = '#28a745';
+                validationMessage.style.display = 'block';
+            } else {
+                validationMessage.innerText = 'Token inválido ou documento não encontrado.';
+                validationMessage.style.backgroundColor = '#f8d7da';
+                validationMessage.style.borderColor = '#dc3545';
+                validationMessage.style.display = 'block';
+            }
+        });
+
+        // Token Validator
+        document.getElementById('validateTokenForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const token = document.getElementById('tokenInput').value.trim();
+            const resultDiv = document.getElementById('tokenResult');
+            const docs = JSON.parse(localStorage.getItem('generatedDocuments') || '{}');
+            const doc = docs[token];
+
+            if (doc) {
+                resultDiv.innerHTML = `
+                    <strong>Token válido!</strong><br>
+                    <b>Doador:</b> ${doc.donor || '-'}<br>
+                    <b>Valor:</b> R$ ${doc.amount || '-'}<br>
+                    <b>Data:</b> ${doc.date ? new Date(doc.date).toLocaleDateString() : '-'}
+                `;
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#dcfce7';
+                resultDiv.style.borderColor = '#22c55e';
+                resultDiv.style.color = '#166534';
+            } else {
+                resultDiv.innerHTML = 'Token não encontrado ou inválido.';
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#fee2e2';
+                resultDiv.style.borderColor = '#ef4444';
+                resultDiv.style.color = '#991b1b';
+            }
+        });
+
+        // Initial page load check
+        if (loggedInUser) {
+            showPage('donorDashboard');
+        } else {
+            showPage('loginPage');
+        }
+    </script>
+</body>
+</html>
