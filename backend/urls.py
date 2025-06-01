@@ -51,9 +51,7 @@ urlpatterns = [
 
         # Se estiver usando o blacklisting de tokens JWT (simple_jwt.token_blacklist),
         # as URLs de blacklisting podem ser incluídas aqui [3, 15].
-         path('token/', include('rest_framework_simplejwt.urls')), # Inclui obtain, refresh, verify, blacklist
-        # ou
-        # path('token/blacklist/', include('rest_framework_simplejwt.token_blacklist.urls')),
+        # path('token/blacklist/', include('token_blacklist.urls')),
 
 
     ])),
