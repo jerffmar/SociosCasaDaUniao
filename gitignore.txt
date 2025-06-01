@@ -1,20 +1,33 @@
-# Ambiente virtual Python
+# Ignorar ambientes virtuais Python
+venv/
 .venv/
+env/ # Mencionado como possível nome de ambiente virtual [3]
 
-# Arquivos de cache do Python
+# Ignorar arquivos e diretórios específicos do Python e Django
+*.pyc
 __pycache__/
-*.py[cod]
-*$py.class
+db.sqlite3 # Banco de dados padrão do Django em desenvolvimento
+media/ # Diretório onde arquivos de mídia (uploads) podem ser armazenados
+staticfiles/ # Diretório onde arquivos estáticos são coletados (python manage.py collectstatic) [6]
 
-# Banco de dados SQLite
-db.sqlite3
+# Ignorar arquivos e diretórios específicos do Node.js e React
+node_modules/ # Dependências do frontend [7-9]
+frontend/build/ # Diretório de build do React [9-11]
+.cache/
 
-# Arquivos de configuração do VS Code
-.vscode/
+# Ignorar arquivos de log
+*.log # Arquivos com extensão .log
+logs/ # Diretório de logs (como mencionado para Celery) [12, 13]
 
-# Arquivos de migração do Django (opcional manter, mas pode ignorar se desejar)
-# doadores/migrations/
+# Ignorar configurações locais e variáveis de ambiente (exemplo, ajuste conforme sua estrutura)
+.env
+.flaskenv
+# local_settings.py # Um nome comum para arquivo de configurações locais
 
-# Arquivos temporários do sistema operacional
+# Ignorar arquivos de sistemas operacionais ou editores/IDEs
 .DS_Store
-Thumbs.db
+.idea/
+.vscode/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
