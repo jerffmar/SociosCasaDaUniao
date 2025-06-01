@@ -320,12 +320,21 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}register/`, {
+                // Alterada a URL para /cadastrar/
+                const response = await fetch('/cadastrar/', { 
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        // 'X-CSRFToken': getCookie('csrftoken') // Se CSRF for necessário para esta API
                     },
-                    body: JSON.stringify({ name, email, password, cpf, phone })
+                    body: JSON.stringify({ 
+                        name: name,
+                        email: email, 
+                        password: password, 
+                        password_confirm: confirmPassword,
+                        cpf: cpf, 
+                        telefone: phone 
+                    })
                 });
 
                 const data = await response.json();
@@ -335,9 +344,16 @@
                     document.getElementById('registrationForm').reset();
                     setTimeout(() => showPage('loginPage'), 2000);
                 } else {
-                    displayMessage('registrationMessage', data.message, 'error');
+                    let errorMessage = data.message || "Erro ao cadastrar.";
+                    if (data.errors) {
+                        for (const key in data.errors) {
+                            errorMessage += `\n${key}: ${data.errors[key].join ? data.errors[key].join(', ') : data.errors[key]}`;
+                        }
+                    }
+                    displayMessage('registrationMessage', errorMessage, 'error');
                 }
             } catch (error) {
+                console.error("Erro no cadastro:", error);
                 displayMessage('registrationMessage', 'Erro de conexão com o servidor. Tente novamente.', 'error');
             }
         });

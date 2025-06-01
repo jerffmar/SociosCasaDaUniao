@@ -1,2 +1,8 @@
 django
 djangorestframework-simplejwt
+celery
+redis
+channels
+channels-redis
+django-celery-beat
+django-celery-results

@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os # Adicionado para variáveis de ambiente
+from datetime import timedelta # Adicionado para configuração do Simple JWT
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +22,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-arw78j&hh8l6mdp46p$ck_t*wbk4jxj+)u8-14u%2v-3kr41gd'
+# Considere carregar a SECRET_KEY de uma variável de ambiente em produção
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-arw78j&hh8l6mdp46p$ck_t*wbk4jxj+)u8-14u%2v-3kr41gd')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Defina DEBUG como False em produção e carregue de uma variável de ambiente
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
+# Em produção, defina seus domínios permitidos, ex: ['seudominio.com', 'api.seudominio.com']
+# Para desenvolvimento, você pode adicionar:
+if DEBUG:
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
 
 # Application definition
@@ -37,12 +45,29 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',  # Accounts app para gerenciar usuários
+
+    # Apps de terceiros
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'channels', # Se estiver usando Channels
+    'django_celery_results', # Se estiver usando Celery com backend de resultados no DB
+
+    # Seus apps (assumindo que estão dentro do diretório 'backend')
+    'backend.accounts', # Adicionado
+    'backend.core',     # Adicionado
+    'backend.activities',
+    'backend.rifas',
+    'backend.caronas',
+    'backend.notifications',
+    'backend.tasks',
+    # 'backend.token', # Verifique se este é um app ou parte do simplejwt
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # Deve vir antes de CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,10 +80,11 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Adicione se tiver templates globais
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -68,6 +94,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+# Adicionado para Django Channels
+ASGI_APPLICATION = 'backend.asgi.application'
 
 
 # Database
@@ -79,8 +107,10 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# Considere usar PostgreSQL ou MySQL para produção.
 
-AUTH_USER_MODEL = 'accounts.CustomUser' # Define o modelo de usuário customizado
+# Modelo de usuário customizado
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -104,9 +134,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br' # Alterado para português do Brasil
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo' # Alterado para fuso horário de São Paulo
 
 USE_I18N = True
 
@@ -116,9 +146,152 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Para coletar arquivos estáticos em produção
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'), # Se você tiver uma pasta 'static' global no projeto
+]
+
+# Media files (arquivos enviados pelos usuários)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # Adicione outras classes de autenticação se necessário, ex: SessionAuthentication para o Admin
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated', # Padrão: requer autenticação
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10, # Número de itens por página
+    # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema', # Para documentação da API
+}
+
+# Simple JWT settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Tempo de vida do token de acesso
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Tempo de vida do token de atualização
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY, # Usa a mesma SECRET_KEY do Django
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = False # Defina como False em produção e use CORS_ALLOWED_ORIGINS
+# Em desenvolvimento, você pode permitir todas as origens ou especificar o frontend
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000", # Exemplo para um frontend React/Vue/Angular rodando localmente
+        "http://127.0.0.1:3000",
+        "http://localhost:8000", # Se o frontend for servido pelo Django em dev
+        "http://127.0.0.1:8000",
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        # "https://seudominiofrontend.com",
+    ]
+
+# Se você precisar permitir credenciais (cookies, cabeçalhos de autorização)
+# CORS_ALLOW_CREDENTIALS = True
+
+# Email backend settings (exemplo para console, configure para produção)
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Configure seu backend de email para produção aqui
+    # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    # EMAIL_HOST = 'smtp.example.com'
+    # EMAIL_PORT = 587
+    # EMAIL_USE_TLS = True
+    # EMAIL_HOST_USER = 'user@example.com'
+    # EMAIL_HOST_PASSWORD = 'password'
+    pass
+
+# Logging (exemplo básico, pode ser expandido)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO', # Mude para WARNING ou ERROR em produção
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
+
+# Celery Configuration Options
+# Use Redis como broker e backend para Celery em um ambiente de produção.
+# Para desenvolvimento, você pode usar o broker de desenvolvimento do Celery.
+# Certifique-se de ter o Redis rodando se for usá-lo.
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'django-db') # Usa o banco de dados para armazenar resultados
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler' # Para tarefas agendadas
+
+# Channel Layers (para WebSockets)
+# Use Redis como channel layer em produção.
+# Para desenvolvimento, você pode usar o InMemoryChannelLayer.
+if DEBUG:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379/1')],
+            },
+        },
+    }
+
+# Configurações de Autenticação para Django Templates (não JWT)
+LOGIN_URL = 'login' # Nome da rota de login que definiremos em accounts.urls
+LOGIN_REDIRECT_URL = 'home' # Nome da rota para redirecionar após login bem-sucedido (definiremos em core.urls)
+LOGOUT_REDIRECT_URL = 'login' # Para onde ir após logout
