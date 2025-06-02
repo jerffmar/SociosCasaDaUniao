@@ -80,8 +80,9 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Adicione se tiver templates globais
-        'APP_DIRS': True,
+        # Adiciona o diretório 'templates' que está dentro da pasta 'backend'
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True, # Mantém True para carregar templates de apps instalados
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -121,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8, # Mínimo de 8 caracteres
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -128,6 +132,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # Para garantir maiúsculas, minúsculas e números, você pode precisar de um validador customizado
+    # ou confiar que os usuários criarão senhas complexas devido ao min_length e
+    # à não similaridade com atributos do usuário.
+    # Uma alternativa é usar um RegexValidator diretamente no serializer se os validadores padrão não forem suficientes.
 ]
 
 
@@ -292,6 +300,11 @@ else:
     }
 
 # Configurações de Autenticação para Django Templates (não JWT)
-LOGIN_URL = 'login' # Nome da rota de login que definiremos em accounts.urls
-LOGIN_REDIRECT_URL = 'home' # Nome da rota para redirecionar após login bem-sucedido (definiremos em core.urls)
-LOGOUT_REDIRECT_URL = 'login' # Para onde ir após logout
+LOGIN_URL = 'login' # Nome da URL definida em backend/urls.py para auth_views.LoginView
+LOGIN_REDIRECT_URL = '/'  # Para onde redirecionar após login via página do Django
+LOGOUT_REDIRECT_URL = '/' # Para onde redirecionar após logout via página do Django
+
+AUTHENTICATION_BACKENDS = [
+    'backend.accounts.backends.PhoneAuthBackend',  # Nosso backend customizado para login por telefone
+    'django.contrib.auth.backends.ModelBackend',     # Backend padrão do Django (autentica via USERNAME_FIELD)
+]

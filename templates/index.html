@@ -1,551 +1,540 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casa da União Luz de Maria</title>
-    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap)" rel="stylesheet">
-    <script src="[https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js](https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js)"></script>
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js](https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js)"></script>
+    <title>Gestão de Sócios - Casa da União</title>
     <style>
-        body {
-            font-family: 'Poppins', Arial, sans-serif;
-            background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
-            min-height: 100vh;
-            margin: 0;
+        html { height: 100%; }
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            background-color: #f4f7f6; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
+        .header, .footer { background-color: #00447c; color: white; text-align: center; padding: 15px; width: 100%; flex-shrink: 0;}
+        .header h1 { margin: 0; font-size: 1.5em; }
+        .footer p { margin: 0; font-size: 0.9em; }
+        
+        .main-content-wrapper {
+            flex-grow: 1; 
+            width: 100%;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            align-items: center; 
+            justify-content: center; /* Adicionado para centralizar verticalmente o conteúdo */
+            padding-top: 20px; 
+            padding-bottom: 20px; 
         }
-        .container {
-            background: #fff;
-            padding: 32px 28px;
-            border-radius: 18px;
-            box-shadow: 0 6px 32px rgba(37, 99, 235, 0.08), 0 1.5px 6px rgba(0,0,0,0.03);
-            width: 100%;
-            max-width: 410px;
-            text-align: center;
-            margin-top: 28px;
+
+        .container { 
+            background-color: #ADD8E6; /* Alterado de white para azul bebê */
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); /* Sombra um pouco mais pronunciada */
+            width: 100%; 
+            max-width: 400px; 
+            margin-bottom:20px; 
+            text-align: center; /* Centraliza o conteúdo do container, incluindo a logo se movida para dentro */
         }
-        .logo-container {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
+        .logo-container { 
+            /* text-align: center; Removido daqui, pois o .container já centraliza */
+            margin-bottom: 20px; /* Espaço abaixo da logo */
         }
-        .logo-container img {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
+        .logo-container img { 
+            max-width: 499px; /* Ajuste o tamanho da logo conforme necessário */
+            display: block; /* Para permitir margin auto se necessário */
+            margin-left: auto; /* Centraliza a imagem se ela for menor que o container */
+            margin-right: auto;
         }
-        h1, h2 {
-            color: #2563eb;
-            margin-bottom: 18px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+        h2 { 
+            text-align: center; 
+            color: #333; 
+            margin-top: 0; 
+            margin-bottom: 25px; /* Mais espaço abaixo do título */
         }
-        h3 {
-            color: #1e293b;
-            margin-bottom: 12px;
-            font-weight: 600;
+        label { 
+            display: block; 
+            margin-bottom: 8px; /* Aumentado espaço */
+            color: #555; 
+            font-weight: bold; 
+            text-align: left; /* Alinha labels à esquerda */
         }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #334155;
-            text-align: left;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 11px 12px;
-            margin-bottom: 15px;
-            border: 1.5px solid #c7d2fe;
-            border-radius: 7px;
+        input[type="email"], input[type="password"], input[type="text"], input[type="tel"] {
+            width: calc(100% - 22px); 
+            padding: 12px; /* Aumentado padding */
+            margin-bottom: 20px; /* Aumentado espaço */
+            border: 1px solid #ccc; /* Borda um pouco mais escura */
+            border-radius: 4px; 
             box-sizing: border-box;
-            font-size: 15px;
-            background: #f1f5f9;
-            transition: border-color 0.2s;
-        }
-        input:focus, textarea:focus {
-            border-color: #2563eb;
-            outline: none;
-            background: #fff;
+            font-size: 1em;
         }
         button {
-            background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
-            color: #fff;
-            padding: 13px 0;
-            border: none;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 8px rgba(37,99,235,0.08);
-            transition: background 0.2s, box-shadow 0.2s;
+            background-color:rgb(0, 123, 255); color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1em; margin-bottom: 10px;
         }
-        button:hover {
-            background: linear-gradient(90deg, #1d4ed8 60%, #3b82f6 100%);
-            box-shadow: 0 4px 16px rgba(37,99,235,0.13);
-        }
-        #loginPage, #registrationPage, #donorDashboard, #pdfGenerator {
-            display: none;
-        }
-        #loginPage.active, #registrationPage.active, #donorDashboard.active, #pdfGenerator.active {
-            display: block;
-        }
-        .qr-code-container {
-            margin-top: 18px;
-        }
-        .qr-code-container img {
-            max-width: 180px;
-            height: auto;
-            border: 1px solid #e0e7ff;
-            padding: 8px;
-            background: #fff;
-            border-radius: 8px;
-        }
-        .message {
-            margin-top: 14px;
-            padding: 10px 12px;
-            border-radius: 6px;
-            color: #2563eb;
-            background: #e0e7ff;
-            border: 1.5px solid #c7d2fe;
-            font-size: 15px;
-            text-align: left;
-        }
-        .message.success {
-            color: #15803d;
-            background: #dcfce7 !important;
-            border-color: #bbf7d0 !important;
-        }
-        .message.error {
-            color: #b91c1c;
-            background: #fee2e2 !important;
-            border-color: #fecaca !important;
-        }
-        .hidden {
-            display: none;
-        }
-        a#downloadPdfLink {
-            display: inline-block;
-            margin-top: 10px;
-            color: #2563eb;
-            background: #e0e7ff;
-            padding: 8px 16px;
-            border-radius: 6px;
+        button:hover { background-color: #004494; }
+        .secondary-action { background-color: #6c757d; }
+        .secondary-action:hover { background-color: #5a6268; }
+        .link-button { background: none; border: none; color: #0056b3; text-decoration: underline; cursor: pointer; padding: 0; font-size: 0.9em; display: block; text-align: center; margin-top:10px; }
+        .message { padding: 10px; margin-top: 15px; border-radius: 4px; text-align: center; display: none; }
+        .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Estilos para o rodapé e banner de aviso */
+        .footer-link {
+            color: #ADD8E6; /* LightBlue, para combinar com o fundo do rodapé */
             text-decoration: none;
-            font-weight: 500;
-            border: 1px solid #c7d2fe;
-            transition: background 0.2s;
+            font-size: 0.85em;
         }
-        a#downloadPdfLink:hover {
-            background: #dbeafe;
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        .consent-banner {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #343a40;
+            color: white;
+            padding: 15px;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: row;
+        }
+        .consent-banner p {
+            margin: 0;
+            flex-grow: 1; /* Ocupa espaço disponível */
+            font-size: 0.9em;
+        }
+        /* Link dentro do banner */
+        .banner-privacy-link {
+            color: #87CEFA; /* LightSkyBlue, para destacar no fundo escuro */
+            text-decoration: underline;
+        }
+        .banner-privacy-link:hover {
+            color: #ADD8E6; /* LightBlue */
+        }
+
+        .consent-banner button {
+            background-color: #0056b3;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .consent-banner button:hover {
+            background-color: #004494;
+        }
+
+        /* Estilos para a página de política de privacidade */
+        #privacyPolicyPage h4 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #00447c;
+        }
+        #privacyPolicyPage p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
         }
     </style>
 </head>
 <body>
 
-    <div class="container" style="max-width: 200px; padding: 15px; margin-bottom: 20px;">
-        <div class="logo-container">
-            <img src="[https://placehold.co/120x120/e0e7ff/2563eb?text=Logo](https://placehold.co/120x120/e0e7ff/2563eb?text=Logo)" alt="Logo Casa da União Luz de Maria">
+    <header class="header">
+        <h1>Centro Espírita Beneficente União do Vegetal - Núcleo Natal</h1>
+    </header>
+
+    <main class="main-content-wrapper">
+        <!-- A logo foi removida daqui -->
+
+        <!-- Página de Login -->
+        <div id="loginPage" class="container page active">
+            <div class="logo-container"> <!-- Logo movida para dentro do balão de login -->
+                <img src="https://udv.org.br/thoroazo/2016/09/centro-espirita-beneficente-uniao-do-vegetal1.png" alt="Logo Casa da União">
+            </div>
+            <h2>Portal de Membros</h2> <!-- Texto alterado -->
+            <form id="loginForm">
+                <label for="loginPhone">Telefone:</label>
+                <input type="tel" id="loginPhone" name="phone" required placeholder="(XX) XXXXX-XXXX">
+                <label for="loginPassword">Senha:</label>
+                <input type="password" id="loginPassword" name="password" required>
+                <button type="submit">Entrar</button>
+            </form>
+            <button type="button" class="secondary-action" onclick="showPage('registrationPage')">Cadastre-se</button>
+            <a href="#" id="showResetPasswordLink" class="link-button">Recuperar Acesso</a>
+            <p class="message" id="loginMessage"></p>
         </div>
-    </div>
 
-    <div id="loginPage" class="container active" style="margin-bottom: 18px;">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <label for="loginEmail">Email:</label>
-            <input type="email" id="loginEmail" required>
-            <label for="loginPassword">Senha:</label>
-            <input type="password" id="loginPassword" required>
-            <button type="submit">Entrar</button>
-        </form>
-        <button onclick="showPage('registrationPage')">Cadastre-se</button>
-        <p class="message" id="loginMessage" style="display:none;"></p>
-    </div>
+        <!-- Página de Cadastro -->
+        <div id="registrationPage" class="container page">
+            <!-- Se a logo também for desejada aqui, adicione o .logo-container aqui também -->
+            <h2>Cadastre-se</h2>
+            <form id="registrationForm">
+                <label for="regName">Nome Completo:</label>
+                <input type="text" id="regName" name="nome_completo" required>
 
-    <div id="tokenValidator" class="container" style="max-width: 340px; margin-bottom: 28px;">
-        <h3 style="color:#2563eb; margin-bottom:10px; font-size: 1.1rem; font-weight:600;">Validar Doação</h3>
-        <form id="validateTokenForm" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch;">
-            <input type="text" id="tokenInput" placeholder="Token de validação" style="padding: 7px 10px; border-radius: 6px; border: 1px solid #c7d2fe; font-size: 15px;">
-            <button type="submit" style="padding: 7px 14px; border-radius: 6px; border: none; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; margin-top: 2px;">Validar</button>
-        </form>
-        <div id="tokenResult" style="display:none; margin-top: 8px; background: #e0e7ff; border: 1.5px solid #2563eb; border-radius: 8px; padding: 12px 16px; color: #1e293b; min-width: 220px; box-shadow: 0 2px 8px rgba(37,99,235,0.08);"></div>
-    </div>
+                <label for="regPhonePrincipal">Telefone Principal (para login):</label>
+                <input type="tel" id="regPhonePrincipal" name="telefone" required placeholder="(XX) XXXXX-XXXX">
+                
+                <label for="regEmail">Email (opcional, para recuperação):</label>
+                <input type="email" id="regEmail" name="email">
 
-    <div id="registrationPage" class="container">
-        <h2>Cadastro de Doador</h2>
-        <form id="registrationForm">
-            <label for="regName">Nome Completo:</label>
-            <input type="text" id="regName" required>
-            <label for="regEmail">Email:</label>
-            <input type="email" id="regEmail" required>
-            <label for="regPassword">Senha:</label>
-            <input type="password" id="regPassword" required>
-            <label for="regConfirmPassword">Confirmar Senha:</label>
-            <input type="password" id="regConfirmPassword" required>
-            <label for="regCPF">CPF:</label>
-            <input type="text" id="regCPF" placeholder="000.000.000-00">
-            <label for="regPhone">Telefone:</label>
-            <input type="text" id="regPhone" placeholder="(DD) 9XXXX-XXXX">
-            <button type="submit">Cadastrar</button>
-        </form>
-        <button onclick="showPage('loginPage')">Já tem cadastro? Faça login</button>
-        <p class="message" id="registrationMessage" style="display:none;"></p>
-    </div>
+                <label for="regBirthDate">Data de Nascimento:</label>
+                <input type="date" id="regBirthDate" name="data_nascimento" required> 
 
-    <div id="donorDashboard" class="container">
-        <h2>Área do Doador</h2>
-        <p>Bem-vindo(a), <strong id="donorNameDisplay">Doador(a)</strong>!</p>
+                <label for="regPassword">Senha:</label>
+                <input type="password" id="regPassword" name="password" required>
 
-        <h3>Gerar PIX para Doação</h3>
-        <form id="pixForm">
-            <label for="donationAmount">Valor da Doação (R$):</label>
-            <input type="number" id="donationAmount" min="1" step="0.01" value="10.00" required>
-            <button type="submit">Gerar QR Code PIX</button>
-        </form>
-        <div class="qr-code-container" id="qrCodeContainer">
-            <p>QR Code PIX será gerado aqui:</p>
-            <textarea id="pixPayloadText" rows="3" style="width:100%;margin-bottom:10px;" readonly class="hidden"></textarea>
-            <div id="qrCodeImage"></div>
+                <label for="regConfirmPassword">Confirmar Senha:</label>
+                <input type="password" id="regConfirmPassword" name="password2" required> 
+                <label for="regCpf">CPF:</label>
+                <input type="text" id="regCpf" name="cpf" required placeholder="000.000.000-00">
+
+                <button type="submit">Cadastrar</button>
+            </form>
+            <button type="button" class="secondary-action" onclick="showPage('loginPage')">Já tenho conta</button>
+            <p class="message" id="registrationMessage"></p>
         </div>
-        <p class="message" id="pixMessage" style="display:none;"></p>
 
-        <h3>Gerar Documento de Doação</h3>
-        <button onclick="generateDonationDocument()">Gerar Documento PDF</button>
-        <div id="pdfOutput" class="message hidden">
-            <p>Seu documento foi gerado. Guarde o token para validação:</p>
-            <p><strong>Token de Validação:</strong> <span id="validationTokenDisplay"></span></p>
-            <a id="downloadPdfLink" href="#" download="documento_doacao.pdf" class="hidden">Baixar PDF</a>
+        <!-- Página de Recuperação de Senha (Solicitação) -->
+        <div id="resetPasswordPage" class="container page">
+            <h2>Redefinir Senha</h2>
+            <p>Informe seu CPF, data de nascimento e telefone cadastrados para redefinir sua senha.</p>
+            <form id="resetPasswordForm">
+                <label for="resetCpf">CPF:</label>
+                <input type="text" id="resetCpf" name="cpf" required placeholder="000.000.000-00">
+
+                <label for="resetBirthDate">Data de Nascimento:</label>
+                <input type="date" id="resetBirthDate" name="data_nascimento" required>
+
+                <label for="resetPhone">Telefone Cadastrado:</label>
+                <input type="tel" id="resetPhone" name="phone" required placeholder="(XX) XXXXX-XXXX">
+                
+                <button type="submit">Redefinir Senha</button>
+            </form>
+            <button type="button" class="secondary-action" onclick="showPage('loginPage')">Voltar para Login</button>
+            <p class="message" id="resetMessage"></p>
         </div>
-        <button onclick="logoutUser()">Sair</button>
+
+    </main>
+
+    <footer class="footer">
+        <p>© 1961 a 2025 - Centro Espírita Beneficente União do Vegetal. Todos os direitos reservados.</p>
+        <p><a href="#" id="privacyPolicyLink" class="footer-link">Política de Proteção de Dados</a></p>
+    </footer>
+
+    <!-- Banner de Aviso de Uso Obrigatório -->
+    <div id="usageNoticeBanner" class="consent-banner">
+        <p>Para utilizar o Portal de Membros, é necessário aceitar o uso de cookies essenciais e permitir notificações do navegador. Estas funcionalidades são cruciais para a operação do sistema. <a href="#" id="privacyLinkFromBanner" class="banner-privacy-link">Saiba mais sobre nossa política de dados.</a></p>
+        <button id="acceptUsageButton">Entendi e Aceito</button>
     </div>
 
     <script>
-        const API_BASE_URL = '[http://127.0.0.1:8000/api/](http://127.0.0.1:8000/api/)'; // URL do seu backend Django
+        // Definições de URL da API (Mantenha apenas estas)
+        const API_BASE_URL = 'http://127.0.0.1:8000'; // Base URL da sua API Django
+        const API_TOKEN_BASE_URL = `${API_BASE_URL}/api`;
+        const API_ACCOUNTS_BASE_URL = `${API_BASE_URL}/api/accounts`;
 
-        let loggedInUser = null; // Armazena informações do usuário logado
+        const API_LOGIN_URL = `${API_TOKEN_BASE_URL}/login/`; 
+        const API_REGISTER_URL = `${API_ACCOUNTS_BASE_URL}/register/`; // Corrigido para usar a rota de accounts
+        const API_DIRECT_PASSWORD_RESET_URL = `${API_ACCOUNTS_BASE_URL}/password-reset/direct/`;
 
-        // Função para exibir mensagens
-        function displayMessage(elementId, message, type = 'info') {
-            const element = document.getElementById(elementId);
-            element.innerText = message;
-            element.className = 'message'; // Reset classes
-            if (type === 'success') {
-                element.classList.add('success');
-            } else if (type === 'error') {
-                element.classList.add('error');
-            }
-            element.style.display = 'block';
-        }
+        // Elementos DOM
+        const loginPage = document.getElementById('loginPage');
+        const registrationPage = document.getElementById('registrationPage');
+        const dashboardPage = document.getElementById('dashboardPage'); // Certifique-se que este elemento existe no HTML se for usado
+        const privacyPolicyPage = document.getElementById('privacyPolicyPage'); 
+        const resetPasswordPage = document.getElementById('resetPasswordPage'); 
+        
+        const loginForm = document.getElementById('loginForm');
+        const registrationForm = document.getElementById('registrationForm');
+        const resetPasswordForm = document.getElementById('resetPasswordForm');
+        
+        const loginMessage = document.getElementById('loginMessage'); // Adicionado para consistência
+        const registrationMessage = document.getElementById('registrationMessage'); // Adicionado para consistência
+        const resetMessage = document.getElementById('resetMessage');
+        
+        const loginPhoneInput = document.getElementById('loginPhone'); // Adicionado para o loginForm
+        const regPhonePrincipalInput = document.getElementById('regPhonePrincipal'); // Adicionado para o registrationForm
 
-        // Função para ocultar mensagens
-        function hideMessage(elementId) {
-            document.getElementById(elementId).style.display = 'none';
-        }
+        const resetPhoneInput = document.getElementById('resetPhone');
+        const resetCpfInput = document.getElementById('resetCpf'); 
+        const resetBirthDateInput = document.getElementById('resetBirthDate'); 
 
-        // Função para mostrar/ocultar páginas
+        // Variáveis de estado (se necessário)
+        // let validatedIdentifierForPasswordReset = null; // Removido pois não é mais usado
+
         function showPage(pageId) {
-            document.getElementById('loginPage').classList.remove('active');
-            document.getElementById('registrationPage').classList.remove('active');
-            document.getElementById('donorDashboard').classList.remove('active');
-            document.getElementById('tokenValidator').classList.remove('active'); // Certifique-se de ocultar o validador também
-            document.getElementById(pageId).classList.add('active');
-
-            if (pageId === 'donorDashboard' && loggedInUser) {
-                document.getElementById('donorNameDisplay').innerText = loggedInUser.name;
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); // Esconde todas as páginas
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.style.display = 'block'; // Mostra a página alvo
+                if (!targetPage.classList.contains('active')) { // Garante que a classe active seja gerenciada
+                    document.querySelectorAll('.page.active').forEach(p => p.classList.remove('active'));
+                    targetPage.classList.add('active');
+                }
             }
-            hideMessage('loginMessage');
-            hideMessage('registrationMessage');
-            hideMessage('pixMessage');
-            hideMessage('pdfOutput');
-            hideMessage('tokenResult');
+            clearMessages(); 
         }
 
-        // Lidar com o envio do formulário de Login
-        document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                const response = await fetch(`${API_BASE_URL}login/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    loggedInUser = data.user;
-                    displayMessage('loginMessage', data.message, 'success');
-                    setTimeout(() => showPage('donorDashboard'), 1000);
-                } else {
-                    displayMessage('loginMessage', data.message, 'error');
-                }
-            } catch (error) {
-                displayMessage('loginMessage', 'Erro de conexão com o servidor. Tente novamente.', 'error');
-            }
-        });
-
-        // Lidar com o envio do formulário de Cadastro
-        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
-            const cpf = document.getElementById('regCPF').value;
-            const phone = document.getElementById('regPhone').value;
-
-            if (password !== confirmPassword) {
-                displayMessage('registrationMessage', 'As senhas não coincidem.', 'error');
-                return;
-            }
-
-            try {
-                // Alterada a URL para /cadastrar/
-                const response = await fetch('/cadastrar/', { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        // 'X-CSRFToken': getCookie('csrftoken') // Se CSRF for necessário para esta API
-                    },
-                    body: JSON.stringify({ 
-                        name: name,
-                        email: email, 
-                        password: password, 
-                        password_confirm: confirmPassword,
-                        cpf: cpf, 
-                        telefone: phone 
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    displayMessage('registrationMessage', data.message, 'success');
-                    document.getElementById('registrationForm').reset();
-                    setTimeout(() => showPage('loginPage'), 2000);
-                } else {
-                    let errorMessage = data.message || "Erro ao cadastrar.";
-                    if (data.errors) {
-                        for (const key in data.errors) {
-                            errorMessage += `\n${key}: ${data.errors[key].join ? data.errors[key].join(', ') : data.errors[key]}`;
-                        }
-                    }
-                    displayMessage('registrationMessage', errorMessage, 'error');
-                }
-            } catch (error) {
-                console.error("Erro no cadastro:", error);
-                displayMessage('registrationMessage', 'Erro de conexão com o servidor. Tente novamente.', 'error');
-            }
-        });
-
-        // Função para logout
-        async function logoutUser() {
-            try {
-                const response = await fetch(`${API_BASE_URL}logout/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (response.ok) {
-                    loggedInUser = null;
-                    showPage('loginPage');
-                } else {
-                    displayMessage('loginMessage', 'Erro ao fazer logout.', 'error');
-                }
-            } catch (error) {
-                displayMessage('loginMessage', 'Erro de conexão com o servidor.', 'error');
+        function displayMessage(element, message, type) {
+            if (element) { 
+                element.textContent = message;
+                element.className = `message ${type}`;
+                element.style.display = 'block';
             }
         }
 
-        // Gerar PIX
-        document.getElementById('pixForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const donationAmount = parseFloat(document.getElementById('donationAmount').value);
-            const pixPayloadText = document.getElementById('pixPayloadText');
-            const qrCodeImageDiv = document.getElementById('qrCodeImage');
+        function clearMessages() {
+            if (loginMessage) { loginMessage.style.display = 'none'; loginMessage.textContent = ''; loginMessage.className = 'message'; }
+            if (registrationMessage) { registrationMessage.style.display = 'none'; registrationMessage.textContent = ''; registrationMessage.className = 'message'; }
+            if (resetMessage) { resetMessage.style.display = 'none'; resetMessage.textContent = ''; resetMessage.className = 'message'; }
+        }
 
-            if (isNaN(donationAmount) || donationAmount <= 0) {
-                displayMessage('pixMessage', 'Por favor, insira um valor de doação válido.', 'error');
-                pixPayloadText.classList.add('hidden');
-                qrCodeImageDiv.innerHTML = '';
-                return;
-            }
+        if (loginForm) { // Adicionado if para segurança
+            loginForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearMessages();
+                const rawPhone = loginPhoneInput.value.replace(/\D/g, '');
+                const password = document.getElementById('loginPassword').value;
 
-            try {
-                const response = await fetch(`${API_BASE_URL}doacao/pix/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ valor: donationAmount })
-                });
+                if (rawPhone.length < 10 || rawPhone.length > 11) {
+                    displayMessage(loginMessage, 'Por favor, insira um número de telefone válido.', 'error');
+                    return;
+                }
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    pixPayloadText.value = data.pix_payload;
-                    pixPayloadText.classList.remove('hidden');
-                    hideMessage('pixMessage');
-
-                    qrCodeImageDiv.innerHTML = ''; // Limpa QR Code anterior
-                    new QRCode(qrCodeImageDiv, {
-                        text: data.pix_payload,
-                        width: 180,
-                        height: 180,
-                        colorDark : "#000000",
-                        colorLight : "#ffffff",
-                        correctLevel : QRCode.CorrectLevel.H
+                try {
+                    const response = await fetch(API_LOGIN_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: rawPhone, password: password }) 
                     });
-                } else {
-                    displayMessage('pixMessage', data.message, 'error');
-                    pixPayloadText.classList.add('hidden');
-                    qrCodeImageDiv.innerHTML = '';
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('accessToken', data.access); // Assumindo que a API de login retorna tokens JWT
+                        localStorage.setItem('refreshToken', data.refresh);
+                        localStorage.setItem('userIdentifier', rawPhone); 
+                        // updateUserInfo(rawPhone); // Descomente se a função e o elemento existirem
+                        showPage('dashboardPage'); // Certifique-se que 'dashboardPage' existe
+                    } else {
+                        displayMessage(loginMessage, data.detail || 'Erro no login. Verifique seu telefone e senha.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    displayMessage(loginMessage, 'Erro de conexão ao tentar fazer login.', 'error');
                 }
-            } catch (error) {
-                displayMessage('pixMessage', 'Erro ao gerar PIX. Verifique a conexão com o servidor.', 'error');
-                pixPayloadText.classList.add('hidden');
-                qrCodeImageDiv.innerHTML = '';
-            }
-        });
+            });
+        }
 
-        // Gerar Documento de Doação (PDF)
-        async function generateDonationDocument() {
-            if (!loggedInUser) {
-                displayMessage('pdfOutput', 'Você precisa estar logado para gerar um documento.', 'error');
-                return;
-            }
-
-            const donationAmount = parseFloat(document.getElementById('donationAmount').value || 0);
-
-            try {
-                const response = await fetch(`${API_BASE_URL}doacao/documento/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ valor: donationAmount })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-
-                    doc.setFontSize(18);
-                    doc.text("Recibo de Doação - Casa da União Luz de Maria", 105, 20, null, null, "center");
-
-                    doc.setFontSize(12);
-                    doc.text(`Data: ${new Date(data.data_doacao).toLocaleDateString()}`, 20, 40);
-                    doc.text(`Doador(a): ${data.doador_nome}`, 20, 50);
-                    doc.text(`Email: ${data.doador_email}`, 20, 60);
-                    doc.text(`CPF: ${data.doador_cpf || 'Não informado'}`, 20, 70);
-                    doc.text(`Valor Estimado da Doação: R$ ${parseFloat(data.valor_doacao).toFixed(2)}`, 20, 80);
-                    doc.text(`Este documento atesta a doação para a Casa da União Luz de Maria.`, 20, 100);
-                    doc.text(`Agradecemos imensamente sua contribuição!`, 20, 110);
-
-                    doc.setFontSize(10);
-                    doc.text(`Token de Validação: ${data.token_validacao}`, 20, 130);
-                    doc.text(`ID da Doação: ${data.doacao_id}`, 20, 140);
-
-                    const pdfOutputDiv = document.getElementById('pdfOutput');
-                    const validationTokenDisplay = document.getElementById('validationTokenDisplay');
-                    const downloadPdfLink = document.getElementById('downloadPdfLink');
-
-                    validationTokenDisplay.innerText = data.token_validacao;
-                    downloadPdfLink.href = doc.output('bloburl');
-                    downloadPdfLink.classList.remove('hidden');
-                    pdfOutputDiv.classList.remove('hidden');
-                    displayMessage('pdfOutput', 'Seu documento foi gerado. Guarde o token para validação:', 'success');
-
-                } else {
-                    displayMessage('pdfOutput', data.message, 'error');
+        if (registrationForm) { // Adicionado if para segurança
+            registrationForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearMessages();
+                const nome_completo = document.getElementById('regName').value;
+                const email = document.getElementById('regEmail').value; 
+                const rawTelefone = regPhonePrincipalInput.value.replace(/\D/g, '');
+                const data_nascimento = document.getElementById('regBirthDate').value;
+                const password = document.getElementById('regPassword').value;
+                const password2 = document.getElementById('regConfirmPassword').value;
+                const cpf = document.getElementById('regCpf').value.replace(/\D/g, '');
+                
+                if (!nome_completo || !rawTelefone || !data_nascimento || !password || !password2 || !cpf) {
+                    displayMessage(registrationMessage, 'Todos os campos marcados com * são obrigatórios, incluindo o CPF.', 'error');
+                    return;
                 }
-            } catch (error) {
-                displayMessage('pdfOutput', 'Erro ao gerar documento. Verifique a conexão com o servidor.', 'error');
+                if (password !== password2) {
+                    displayMessage(registrationMessage, 'As senhas não coincidem.', 'error');
+                    return;
+                }
+                if (!rawTelefone || (rawTelefone.length < 10 || rawTelefone.length > 11)) { 
+                    displayMessage(registrationMessage, 'O Telefone Principal é obrigatório e deve ser válido.', 'error');
+                    return;
+                }
+                if (cpf.length !== 11) {
+                    displayMessage(registrationMessage, 'O CPF é obrigatório e deve conter 11 dígitos.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(API_REGISTER_URL, { // Usa a URL de registro correta
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            nome_completo: nome_completo, 
+                            email: email,
+                            password: password, 
+                            password2: password2,
+                            telefone: rawTelefone,
+                            data_nascimento: data_nascimento,
+                            cpf: cpf 
+                        }) 
+                    });
+                    const data = await response.json();
+
+                    if (response.status === 201) {
+                        displayMessage(registrationMessage, data.message || 'Conta criada com sucesso! Faça login para continuar.', 'success');
+                        registrationForm.reset();
+                        setTimeout(() => {
+                            showPage('loginPage');
+                        }, 2500);
+                    } else {
+                        let errorMsg = data.detail || data.message || 'Erro ao cadastrar.'; // Prioriza data.detail
+                        if (typeof data === 'object' && !data.detail && !data.message) { // Se for um objeto de erros
+                             errorMsg = Object.values(data).flat().join(' ');
+                        }
+                        displayMessage(registrationMessage, errorMsg, 'error');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    displayMessage(registrationMessage, 'Erro de conexão ao tentar cadastrar.', 'error');
+                }
+            });
+        }
+        
+        // Função updateUserInfo (descomente e defina userInfoDisplay se for usar)
+        // const userInfoDisplay = document.getElementById('userInfoDisplay'); // Exemplo
+        // function updateUserInfo(identifier) { 
+        //     if (userInfoDisplay) {
+        //         userInfoDisplay.textContent = `Usuário: ${identifier || 'Não identificado'}`;
+        //     }
+        // }
+
+        function logoutUser() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userIdentifier');
+            showPage('loginPage');
+        }
+        
+        // Manipulador para o link "Recuperar Acesso"
+        const showResetPasswordLink = document.getElementById('showResetPasswordLink');
+        if (showResetPasswordLink) {
+            showResetPasswordLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                showPage('resetPasswordPage');
+            });
+        }
+
+
+        if (resetPasswordForm) {
+            resetPasswordForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearMessages();
+                const rawPhone = resetPhoneInput.value.replace(/\D/g, '');
+                const cpf = resetCpfInput.value.replace(/\D/g, '');
+                const birthDate = resetBirthDateInput.value;
+
+                if (!cpf || !birthDate || !rawPhone) { 
+                    displayMessage(resetMessage, 'Por favor, preencha todos os campos: CPF, Data de Nascimento e Telefone.', 'error');
+                    return;
+                }
+                if (cpf.length !== 11) {
+                    displayMessage(resetMessage, 'CPF inválido. Deve conter 11 dígitos.', 'error');
+                    return;
+                }
+                 if (rawPhone.length < 10 || rawPhone.length > 11) {
+                    displayMessage(resetMessage, 'Telefone inválido. Deve conter 10 ou 11 dígitos.', 'error');
+                    return;
+                }
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+                    displayMessage(resetMessage, 'Data de Nascimento inválida. Use o formato AAAA-MM-DD.', 'error');
+                    return;
+                }
+
+                try {
+                    // Certifique-se que API_DIRECT_PASSWORD_RESET_URL está sendo usada aqui
+                    const response = await fetch(API_DIRECT_PASSWORD_RESET_URL, { 
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            cpf: cpf, 
+                            data_nascimento: birthDate, 
+                            telefone: rawPhone 
+                        }) 
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) { 
+                        displayMessage(resetMessage, `${data.message} Sua nova senha é: ${data.new_password}. Anote-a e guarde em local seguro. Você será redirecionado para o login em alguns segundos.`, 'success');
+                        resetPasswordForm.reset();
+                        setTimeout(() => {
+                            showPage('loginPage'); 
+                        }, 10000); 
+                    } else {
+                        displayMessage(resetMessage, data.detail || 'Dados incorretos ou não foi possível redefinir a senha.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro na redefinição de senha:', error);
+                    displayMessage(resetMessage, 'Ocorreu um erro de conexão ao tentar redefinir a senha. Tente novamente.', 'error');
+                }
+            });
+        }
+
+        function handleInitialPageLoad() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#registrationPage')) {
+                showPage('registrationPage');
+            } else if (hash.startsWith('#resetPasswordPage')) {
+                showPage('resetPasswordPage');
+            } else {
+                const token = localStorage.getItem('accessToken');
+                const userIdentifier = localStorage.getItem('userIdentifier');
+                if (token && userIdentifier) {
+                    // updateUserInfo(userIdentifier); // Descomente se for usar
+                    showPage('dashboardPage'); // Certifique-se que 'dashboardPage' existe
+                } else {
+                    showPage('loginPage'); 
+                }
+            }
+        }
+        
+        // Banner de consentimento (exemplo de lógica)
+        const usageNoticeBanner = document.getElementById('usageNoticeBanner');
+        const acceptUsageButton = document.getElementById('acceptUsageButton');
+        const privacyPolicyLink = document.getElementById('privacyPolicyLink');
+        const privacyLinkFromBanner = document.getElementById('privacyLinkFromBanner');
+
+        function checkAndHandleUsageNotice() {
+            if (!localStorage.getItem('usageAccepted')) {
+                if (usageNoticeBanner) usageNoticeBanner.style.display = 'flex';
             }
         }
 
-        // Validar Documento de Doação
-        document.getElementById('validateTokenForm').addEventListener('submit', async function(event) {
+        if (acceptUsageButton) {
+            acceptUsageButton.addEventListener('click', () => {
+                localStorage.setItem('usageAccepted', 'true');
+                if (usageNoticeBanner) usageNoticeBanner.style.display = 'none';
+            });
+        }
+        
+        function showPrivacyPolicy(event) {
             event.preventDefault();
-            const tokenInput = document.getElementById('tokenInput').value.trim();
-            const tokenResultDiv = document.getElementById('tokenResult');
+            showPage('privacyPolicyPage'); // Certifique-se que 'privacyPolicyPage' existe
+        }
 
-            if (!tokenInput) {
-                tokenResultDiv.innerHTML = 'Por favor, insira um token.';
-                tokenResultDiv.style.display = 'block';
-                tokenResultDiv.style.background = '#fee2e2';
-                tokenResultDiv.style.borderColor = '#ef4444';
-                tokenResultDiv.style.color = '#991b1b';
-                return;
-            }
+        if (privacyPolicyLink) {
+            privacyPolicyLink.addEventListener('click', showPrivacyPolicy);
+        }
+        if (privacyLinkFromBanner) {
+            privacyLinkFromBanner.addEventListener('click', showPrivacyPolicy);
+        }
 
-            try {
-                const response = await fetch(`${API_BASE_URL}doacao/validar/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ token: tokenInput })
-                });
 
-                const data = await response.json();
+        // Inicialização
+        checkAndHandleUsageNotice();
+        handleInitialPageLoad();
 
-                if (response.ok) {
-                    tokenResultDiv.innerHTML = `
-                        <strong>Token válido!</strong><br>
-                        <b>Doador:</b> ${data.doador || '-'}<br>
-                        <b>Email:</b> ${data.email || '-'}<br>
-                        <b>Valor:</b> R$ ${data.amount || '-'}<br>
-                        <b>Data:</b> ${data.data || '-'}
-                    `;
-                    tokenResultDiv.style.display = 'block';
-                    tokenResultDiv.style.background = '#dcfce7';
-                    tokenResultDiv.style.borderColor = '#22c55e';
-                    tokenResultDiv.style.color = '#166534';
-                } else {
-                    tokenResultDiv.innerHTML = data.message;
-                    tokenResultDiv.style.display = 'block';
-                    tokenResultDiv.style.background = '#fee2e2';
-                    tokenResultDiv.style.borderColor = '#ef4444';
-                    tokenResultDiv.style.color = '#991b1b';
-                }
-            } catch (error) {
-                tokenResultDiv.innerHTML = 'Erro de conexão com o servidor. Tente novamente.';
-                tokenResultDiv.style.display = 'block';
-                tokenResultDiv.style.background = '#fee2e2';
-                tokenResultDiv.style.borderColor = '#ef4444';
-                tokenResultDiv.style.color = '#991b1b';
-            }
-        });
-
-        // Inicialização: verifica se há um usuário logado (simulado)
-        // Em um ambiente real, você faria uma requisição ao backend para verificar a sessão.
-        // Por simplicidade, aqui sempre começa na página de login.
-        showPage('loginPage');
     </script>
 </body>
 </html>

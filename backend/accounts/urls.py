@@ -1,14 +1,21 @@
 from django.urls import path
-from .views import CustomLoginView, CustomLogoutView
-# Se você tiver outras views de autenticação (ex: API com JWT), elas podem coexistir aqui.
+from .views import (
+    UserLoginView, 
+    UserRegisterView, 
+    UserProfileView, 
+    DirectPasswordResetAPIView # Adicionar nova view
+)
+
+app_name = 'accounts'
 
 urlpatterns = [
-    # URLs para autenticação baseada em sessão/templates
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('login/', UserLoginView.as_view(), name='login'),
+    path('register/', UserRegisterView.as_view(), name='user-register'),
+    path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('password-reset/direct/', DirectPasswordResetAPIView.as_view(), name='direct-password-reset'),
 
-    # Mantenha suas URLs de API JWT aqui se elas já existirem e forem usadas por um frontend separado
-    # Exemplo:
-    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # Remova ou comente as URLs antigas de password reset:
+    # path('password-reset/validate-user/', PasswordResetValidateUserView.as_view(), name='password-reset-validate-user'),
+    # path('password-reset/set-new/', PasswordResetSetNewView.as_view(), name='password-reset-set-new'),
+    # path('password-reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 ]

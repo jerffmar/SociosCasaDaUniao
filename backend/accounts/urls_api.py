@@ -1,11 +1,14 @@
 from django.urls import path
-from .views import UserRegisterView
-# Importe outras views de API de contas aqui, se necessário
+from .views import (
+    UserLoginAPIView, UserRegisterAPIView, 
+    PasswordResetRequestAPIView, PasswordResetConfirmAPIView # Adicionar PasswordResetConfirmAPIView
+)
 
+app_name = 'accounts'
 
 urlpatterns = [
-    path('cadastrar/', UserRegisterView.as_view(), name='api_cadastrar'),  # Alterado de 'register/' para 'cadastrar/'
-    # Se você for usar JWT para este frontend também
-    # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('login/', UserLoginAPIView.as_view(), name='login'),
+    path('register/', UserRegisterAPIView.as_view(), name='register'),
+    path('password-reset/', PasswordResetRequestAPIView.as_view(), name='password_reset_request'),
+    path('password-reset/confirm/', PasswordResetConfirmAPIView.as_view(), name='password_reset_confirm'), # NOVA ROTA
 ]
