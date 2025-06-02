@@ -15,6 +15,9 @@ urlpatterns = [
     # Inclui as URLs do app 'core'
     path('core/', include('backend.core.urls')),
 
+    # Inclui as rotas da API
+    path('api/', include('backend.accounts.urls_api')),  # Certifique-se de que urls_api.py está configurado
+
     # Configuração da URL raiz '/'
     # Exibe a página de login (index.html) para não autenticados e redireciona autenticados para 'core:home'
     path('', lambda request: redirect('core:home') if request.user.is_authenticated else TemplateView.as_view(template_name='index.html')(request), name='index'),
