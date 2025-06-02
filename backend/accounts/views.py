@@ -56,31 +56,21 @@ class UserLoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            # O serializer.validated_data['phone'] já foi validado pelo serializer
             phone_number = serializer.validated_data['phone']
             password = serializer.validated_data['password']
-            
-            # A função authenticate usará os backends configurados em settings.py.
-            # Nosso PhoneAuthBackend tentará autenticar usando phone_number.
-            user = authenticate(request, username=phone_number, password=password) # username é o telefone aqui
+            user = authenticate(request, username=phone_number, password=password)
             
             if user:
                 if user.is_active:
-                    # Se você não estiver usando sessões Django para a API (comum com JWT),
-                    # a chamada login(request, user) pode não ser estritamente necessária
-                    # para o frontend baseado em token, mas não prejudica.
-                    login(request, user) 
-                    
-                    # Gerar tokens JWT se você estiver usando simplejwt
                     refresh = RefreshToken.for_user(user)
                     return Response({
                         "message": "Login bem-sucedido.",
                         "refresh": str(refresh),
                         "access": str(refresh.access_token),
-                        "user": { 
-                            "id": user.id, # É bom retornar o ID
-                            "phone": user.telefone, # Retornar o telefone usado para login
-                            "email": user.email, 
+                        "user": {
+                            "id": user.id,
+                            "phone": user.telefone,
+                            "email": user.email,
                             "first_name": user.first_name,
                             "last_name": user.last_name,
                         }
@@ -89,9 +79,6 @@ class UserLoginView(generics.GenericAPIView):
                     return Response({"detail": "Conta desativada."}, status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response({"detail": "Telefone ou senha inválidos."}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # Se o serializer não for válido, os erros do serializer serão retornados.
-        # Se o UserLoginSerializer estiver esperando 'email' e não 'phone', o erro virá daqui.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DirectPasswordResetAPIView(APIView): # Ou generics.GenericAPIView se preferir

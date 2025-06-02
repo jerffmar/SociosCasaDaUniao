@@ -300,9 +300,9 @@ else:
     }
 
 # Configurações de Autenticação para Django Templates (não JWT)
-LOGIN_URL = 'login' # Nome da URL definida em backend/urls.py para auth_views.LoginView
-LOGIN_REDIRECT_URL = '/'  # Para onde redirecionar após login via página do Django
-LOGOUT_REDIRECT_URL = '/' # Para onde redirecionar após logout via página do Django
+LOGIN_URL = 'accounts:login'  # URL para redirecionar usuários não autenticados
+LOGIN_REDIRECT_URL = 'core:home'  # URL para redirecionar após login bem-sucedido
+LOGOUT_REDIRECT_URL = 'accounts:login'  # URL para redirecionar após logout
 
 AUTHENTICATION_BACKENDS = [
     'backend.accounts.backends.PhoneAuthBackend',  # Nosso backend customizado para login por telefone

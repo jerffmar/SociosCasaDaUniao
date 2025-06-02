@@ -1,10 +1,8 @@
 from django.urls import path
-from .views import HomePageView
+from .views import home_view
 
 app_name = 'core'
 
 urlpatterns = [
-    path('home/', HomePageView.as_view(), name='home'),
-    # Adicione outras URLs do app core aqui
-    # Ex: path('relatorios/eventos/', views.relatorio_eventos_view, name='relatorio_eventos'),
+    path('home/', home_view, name='home'),
 ]

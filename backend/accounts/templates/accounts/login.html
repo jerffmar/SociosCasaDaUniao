@@ -1,9 +1,0 @@
-{% load static %}
-{% comment %} {% extends "base.html" %}  <-- Se você estiver estendendo um base.html, e o base.html já tem {% load static %}, isso pode não ser necessário aqui, a menos que você use {% static %} antes do bloco de conteúdo herdado. {% endcomment %}
-
-{% block content %}
-<!-- Seu conteúdo de login aqui -->
-<!-- Exemplo de uso da tag static dentro deste template -->
-<link rel="stylesheet" href="{% static 'accounts/css/login_styles.css' %}">
-<!-- ... resto do seu template de login ... -->
-{% endblock %}

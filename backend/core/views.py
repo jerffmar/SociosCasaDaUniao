@@ -9,12 +9,11 @@ def home_view(request):
     return render(request, 'core/home.html')
 
 def index_redirect_view(request):
+    # Redireciona usuários autenticados para 'core:home' e não autenticados para 'accounts:login'
     if request.user.is_authenticated:
-        return redirect(reverse('home'))  # 'home' é o name da sua URL para a página inicial
+        return redirect(reverse('core:home'))
     else:
-        # 'login' é o name da sua URL de login, conforme definido em accounts.urls
-        # e referenciado em settings.LOGIN_URL
-        return redirect(reverse('login'))
+        return redirect(reverse('accounts:login'))
 
 @method_decorator(login_required, name='dispatch')
 class HomePageView(TemplateView):
