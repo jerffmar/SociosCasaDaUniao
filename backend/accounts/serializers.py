@@ -3,8 +3,13 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import CustomUser # Certifique-se que CustomUser está importado
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import get_user_model # Se já não estiver importado
+import re # Para limpar o número de telefone
 import random
 import string
+from django.contrib.auth import authenticate
+
 
 CustomUser = get_user_model()
 
@@ -150,8 +155,32 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 class UserLoginSerializer(serializers.Serializer):
-    phone = serializers.CharField() # Alterado de 'telefone' para 'phone' para corresponder ao frontend
-    password = serializers.CharField(write_only=True)
+    """
+    Serializador para o login do usuário via API, esperando telefone e senha.
+    """
+    phone = serializers.CharField(
+        max_length=20, # Ou o tamanho que você usa para telefone
+        label="Telefone",
+        help_text="Número de telefone para login."
+    )
+    password = serializers.CharField(
+        label="Senha",
+        style={'input_type': 'password'},
+        trim_whitespace=False,
+        write_only=True, # Importante para não retornar a senha
+        help_text="Senha para login."
+    )
+
+    def validate(self, attrs):
+        phone = attrs.get('phone')
+        password = attrs.get('password')
+
+        if not phone or not password:
+            # Este erro seria diferente do que você está vendo, mas é uma boa prática.
+            raise serializers.ValidationError("Telefone e senha são obrigatórios.", code='authorization')
+        
+        # Nenhuma validação de 'email' aqui.
+        return attrs
 
 class DirectPasswordResetSerializer(serializers.Serializer):
     cpf = serializers.CharField(required=True)
@@ -199,3 +228,116 @@ class DirectPasswordResetSerializer(serializers.Serializer):
         self.user.set_password(new_password)
         self.user.save()
         return new_password
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Adicione claims customizadas ao token se desejar
+        # token['first_name'] = user.first_name
+        # token['phone'] = user.telefone # Exemplo
+        return token
+
+    def validate(self, attrs):
+        # O campo 'username' no attrs será o que o frontend enviar como 'phone'
+        # se alterarmos o nome do campo no serializer ou se o frontend enviar 'username'
+        # Para manter o frontend enviando 'phone', precisamos pegar 'phone' de attrs
+        
+        phone_input = attrs.get("phone") # Espera que o frontend envie 'phone'
+        password = attrs.get("password")
+
+        if not phone_input or not password:
+            raise serializers.ValidationError("Telefone e senha são obrigatórios.", code="authorization")
+
+        # Limpa o número de telefone para conter apenas dígitos
+        cleaned_phone = re.sub(r'\D', '', str(phone_input))
+        if not cleaned_phone:
+            raise serializers.ValidationError("Número de telefone inválido.", code="authorization")
+
+        # Tenta encontrar o usuário pelo telefone
+        try:
+            user = CustomUser.objects.get(telefone=cleaned_phone)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("Nenhum usuário ativo encontrado com este telefone.", code="authorization")
+        
+        # Autentica usando o backend PhoneAuthBackend (ou qualquer backend configurado)
+        # Passamos o 'username' como o telefone para o PhoneAuthBackend
+        self.user = self.context['request'].user = user # Necessário para que o authenticate funcione corretamente com o request
+        authenticated_user = authenticate(request=self.context.get('request'), username=cleaned_phone, password=password)
+
+        if not authenticated_user:
+            raise serializers.ValidationError("Telefone ou senha inválidos.", code="authorization")
+
+        if not authenticated_user.is_active:
+            raise serializers.ValidationError("Conta de usuário desativada.", code="authorization")
+        
+        # O super().validate() espera 'username' e 'password' no attrs.
+        # Como já autenticamos, podemos construir os dados esperados por ele ou
+        # diretamente retornar os tokens. Para maior compatibilidade, vamos
+        # simular o que o super().validate() faria após a autenticação.
+        
+        # Atualiza attrs para o que o super().validate() esperaria
+        # O 'username' aqui deve ser o USERNAME_FIELD do usuário encontrado
+        attrs[self.username_field] = getattr(authenticated_user, self.username_field)
+        attrs['password'] = password # A senha já está aqui
+
+        # Agora chame o super().validate() com os dados corretos
+        # No entanto, como já fizemos a autenticação e temos o usuário,
+        # podemos simplesmente retornar os tokens.
+        
+        refresh = self.get_token(authenticated_user)
+
+        data = {}
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+        
+        # Adicionar dados do usuário à resposta, se desejado
+        data["user"] = {
+            "id": authenticated_user.id,
+            "phone": authenticated_user.telefone,
+            "email": authenticated_user.email,
+            "first_name": authenticated_user.first_name,
+            "last_name": authenticated_user.last_name,
+        }
+        
+        return data
+
+        
+
+    # Adicione o campo 'phone' ao serializer para que ele seja esperado
+    phone = serializers.CharField(write_only=True, required=True)
+    # O campo 'password' já é herdado e é write_only=True, required=True
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id', 
+            'email', 
+            'nome_completo', # Assumindo que você tem este campo
+            'first_name', # Se estiver usando os campos padrão do Django
+            'last_name',  # Se estiver usando os campos padrão do Django
+            'telefone', 
+            'data_nascimento',
+            'genero',
+            'cpf',
+            'cargo',
+            'grau',
+            'equipe',
+            'profile_pic_url', # Se você tiver um campo/método para a URL da foto
+            'is_staff',        # Para verificar se é admin/staff
+            'is_superuser',    # Para verificar se é superuser
+            # Adicione quaisquer outros campos que o frontend precise
+        ]
+        read_only_fields = [
+            'id', 'email', 'is_staff', 'is_superuser', # Campos que o usuário não deve editar diretamente via este serializer
+            'cargo', 'grau', 'equipe' # Geralmente atribuídos por admins
+        ] 
+
+    # Se 'profile_pic_url' não for um campo direto do modelo, 
+    # mas um método ou property, você pode usar SerializerMethodField:
+    # profile_pic_url = serializers.SerializerMethodField()
+    # def get_profile_pic_url(self, obj):
+    #     if obj.profile_pic: # Supondo que 'profile_pic' seja um ImageField
+    #         return self.context['request'].build_absolute_uri(obj.profile_pic.url)
+    #     return None # Ou uma URL de imagem padrão

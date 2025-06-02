@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Socios Casa da União{% endblock %}</title>
+    <!-- Exemplo de como usar a tag static para carregar um arquivo CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <!-- Conteúdo do cabeçalho -->
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Conteúdo principal da página virá aqui -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <!-- Conteúdo do rodapé -->
+    </footer>
+
+    <!-- Exemplo de como usar a tag static para carregar um arquivo JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

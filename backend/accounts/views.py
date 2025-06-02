@@ -10,12 +10,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
+from rest_framework_simplejwt.tokens import RefreshToken # Se estiver usando JWT para tokens
+from rest_framework_simplejwt.views import TokenObtainPairView as BaseTokenObtainPairView
 from .serializers import (
     UserRegisterSerializer, 
     UserLoginSerializer, 
     DirectPasswordResetSerializer,
-    # Adicione aqui o serializer do perfil do usuário, ex: UserProfileSerializer
+    CustomTokenObtainPairSerializer, # Importe o novo serializer
+    UserProfileSerializer # Importe o serializer de perfil
 )
 
 CustomUser = get_user_model()
@@ -54,63 +56,87 @@ class UserLoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            phone_number = serializer.validated_data['phone'] # 'phone' do UserLoginSerializer
+            # O serializer.validated_data['phone'] já foi validado pelo serializer
+            phone_number = serializer.validated_data['phone']
             password = serializer.validated_data['password']
             
             # A função authenticate usará os backends configurados em settings.py.
             # Nosso PhoneAuthBackend tentará autenticar usando phone_number.
-            user = authenticate(request, username=phone_number, password=password)
+            user = authenticate(request, username=phone_number, password=password) # username é o telefone aqui
             
             if user:
                 if user.is_active:
+                    # Se você não estiver usando sessões Django para a API (comum com JWT),
+                    # a chamada login(request, user) pode não ser estritamente necessária
+                    # para o frontend baseado em token, mas não prejudica.
                     login(request, user) 
+                    
+                    # Gerar tokens JWT se você estiver usando simplejwt
+                    refresh = RefreshToken.for_user(user)
                     return Response({
                         "message": "Login bem-sucedido.",
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
                         "user": { 
-                            "email": user.email, # Ainda podemos retornar o email se desejado
+                            "id": user.id, # É bom retornar o ID
+                            "phone": user.telefone, # Retornar o telefone usado para login
+                            "email": user.email, 
                             "first_name": user.first_name,
                             "last_name": user.last_name,
-                            # Adicione outros campos do usuário conforme necessário
                         }
                     }, status=status.HTTP_200_OK)
                 else:
                     return Response({"detail": "Conta desativada."}, status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response({"detail": "Telefone ou senha inválidos."}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Se o serializer não for válido, os erros do serializer serão retornados.
+        # Se o UserLoginSerializer estiver esperando 'email' e não 'phone', o erro virá daqui.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class DirectPasswordResetAPIView(APIView):
+class DirectPasswordResetAPIView(APIView): # Ou generics.GenericAPIView se preferir
     permission_classes = [AllowAny] 
 
     def post(self, request, *args, **kwargs):
-        serializer = DirectPasswordResetSerializer(data=request.data)
+        serializer = DirectPasswordResetSerializer(data=request.data, context={'request': request}) # Adicione context se necessário
         if serializer.is_valid():
             try:
-                new_password = serializer.save()
+                # O método save() do serializer agora retorna a nova senha gerada
+                generated_password = serializer.save() 
+                
                 return Response({
-                    "message": "Sua senha foi redefinida com sucesso.",
-                    "new_password": new_password
+                    "detail": "Senha redefinida com sucesso. Sua nova senha é:", # Mensagem ajustada
+                    "new_password": generated_password # Inclui a nova senha na resposta
                 }, status=status.HTTP_200_OK)
             except Exception as e:
+                # Logar o erro 'e' aqui é crucial para depuração
+                print(f"Erro interno não tratado ao redefinir senha: {e}") 
                 return Response({"detail": "Ocorreu um erro interno ao tentar redefinir a senha."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+        # Lógica para formatar erros de validação (como estava antes)
         error_messages = []
         if "non_field_errors" in serializer.errors:
             error_messages.extend(serializer.errors["non_field_errors"])
         else:
             for field, errors in serializer.errors.items():
-                error_messages.append(f"{field.replace('_', ' ').capitalize()}: {', '.join(errors)}")
+                # Evita adicionar o campo 'Generated password' se ele aparecer nos erros
+                # pois não é um campo de entrada.
+                if field != 'generated_password':
+                    error_messages.append(f"{field.replace('_', ' ').capitalize()}: {', '.join(errors)}")
         
         return Response({"detail": " ".join(error_messages) if error_messages else "Dados inválidos."}, status=status.HTTP_400_BAD_REQUEST)
 
 # Adicione ou descomente UserProfileView
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
-    # serializer_class = UserProfileSerializer # Substitua pelo seu serializer de perfil
-    permission_classes = [IsAuthenticated] # Geralmente requer autenticação
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated] # Apenas usuários autenticados podem acessar
 
     def get_object(self):
-        # Retorna o perfil do usuário logado
+        # Garante que o usuário só possa ver/editar seu próprio perfil
         return self.request.user
 
     # Você pode adicionar lógica personalizada para update (PUT/PATCH) se necessário
+
+class CustomTokenObtainPairView(BaseTokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
