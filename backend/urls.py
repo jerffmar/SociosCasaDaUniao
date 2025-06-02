@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -14,11 +15,9 @@ urlpatterns = [
     # Inclui as URLs do app 'core'
     path('core/', include('backend.core.urls')),
 
-    # Inclui as rotas da API
-    path('api/', include('backend.accounts.urls_api')),  # Certifique-se de que urls_api.py está configurado
-
     # Configuração da URL raiz '/'
-    path('', lambda request: redirect('core:home') if request.user.is_authenticated else redirect('accounts:login'), name='index'),
+    # Exibe a página de login (index.html) para não autenticados e redireciona autenticados para 'core:home'
+    path('', lambda request: redirect('core:home') if request.user.is_authenticated else TemplateView.as_view(template_name='index.html')(request), name='index'),
 ]
 
 # Configuração para servir arquivos de mídia em desenvolvimento

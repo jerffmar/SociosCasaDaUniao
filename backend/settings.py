@@ -80,9 +80,8 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Adiciona o diretório 'templates' que está dentro da pasta 'backend'
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True, # Mantém True para carregar templates de apps instalados
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Certifique-se de que este caminho está correto
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -300,9 +299,9 @@ else:
     }
 
 # Configurações de Autenticação para Django Templates (não JWT)
-LOGIN_URL = 'accounts:login'  # URL para redirecionar usuários não autenticados
+LOGIN_URL = '/'  # URL para redirecionar usuários não autenticados (index.html)
 LOGIN_REDIRECT_URL = 'core:home'  # URL para redirecionar após login bem-sucedido
-LOGOUT_REDIRECT_URL = 'accounts:login'  # URL para redirecionar após logout
+LOGOUT_REDIRECT_URL = '/'  # URL para redirecionar após logout (index.html)
 
 AUTHENTICATION_BACKENDS = [
     'backend.accounts.backends.PhoneAuthBackend',  # Nosso backend customizado para login por telefone

@@ -23,8 +23,8 @@ from .serializers import (
 CustomUser = get_user_model()
 
 class CustomLoginView(AuthLoginView):
-    template_name = 'accounts/login.html'
-    authentication_form = LoginForm # Já está correto
+    template_name = 'accounts/login.html'  # Certifique-se de que este caminho está correto
+    authentication_form = LoginForm
     success_url = reverse_lazy('core:home')
     # LOGIN_REDIRECT_URL em settings.py também é respeitado.
 
