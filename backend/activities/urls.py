@@ -1,9 +1,9 @@
 from django.urls import path
-# Importe suas views aqui
-# Exemplo: from . import views
+from .views import EventListAPIView, schedule_event
+
+app_name = 'activities'
 
 urlpatterns = [
-    # Adicione seus padrões de URL aqui
-    # Exemplo: path('calendar/', views.CalendarView.as_view(), name='calendar'),
-    # Exemplo: path('schedule-event/', views.ScheduleEventView.as_view(), name='schedule-event'),
+    path('events/', EventListAPIView.as_view(), name='event-list'),
+    path('schedule_event/', schedule_event, name='schedule_event'),
 ]

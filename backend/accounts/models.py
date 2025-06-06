@@ -1,6 +1,28 @@
+import os
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+def user_profile_pic_path(instance, filename):
+    """
+    Gera o caminho para a foto de perfil do usuário.
+    Salva como: profile_pics/12345678900.png
+    Onde 12345678900 é o CPF limpo do usuário.
+    Nota: Esta função apenas define o nome do arquivo com a extensão .png.
+    Não converte o formato do arquivo. Se um JPEG for carregado, será salvo
+    como <cpf>.png, mas o conteúdo ainda será JPEG.
+    Para conversão real, seria necessário processamento adicional.
+    """
+    # Limpa o CPF para usar no nome do arquivo
+    # Garante que instance.cpf existe e não é None, e remove não dígitos
+    cpf_cleaned = ''.join(filter(str.isdigit, str(instance.cpf))) if instance.cpf else 'unknown_cpf'
+    
+    # Define a extensão como .png, conforme solicitado
+    ext = 'png' 
+    
+    new_filename = f"{cpf_cleaned}.{ext}"
+    
+    return os.path.join('profile_pics', new_filename)
 
 # Opções para o campo Gênero
 CHAR_CHOICES = [
@@ -44,16 +66,24 @@ class CustomUser(AbstractUser):
     # AbstractUser já fornece campos como username, first_name, last_name,
     # email, password, is_staff, is_active, date_joined, etc.
 
-    # Define o email como o campo principal de autenticação [4]
-    USERNAME_FIELD = 'email'
-    # Mantém o campo username como obrigatório durante a criação de superusuário [4]
-    REQUIRED_FIELDS = ['username']
-    # Garante que o email seja único [4]
-    email = models.EmailField(_('email address'), unique=True) # Tornar email único se ainda não for
+    # Define o telefone como o campo principal de autenticação
+    USERNAME_FIELD = 'telefone'
+    # Campos obrigatórios ao criar um superusuário via createsuperuser.
+    # 'username' (de AbstractUser) e 'email' ainda são úteis.
+    REQUIRED_FIELDS = ['username', 'email']
+    
+    # Garante que o email seja único e obrigatório
+    email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
 
     # Adiciona campos customizados baseados na idealização do frontend [3]
-    # Campo para o telefone do sócio
-    telefone = models.CharField(_('phone number'), max_length=15, blank=True, null=True)
+    # Campo para o telefone do sócio - agora é o USERNAME_FIELD
+    telefone = models.CharField(
+        _('phone number'), 
+        max_length=15, 
+        unique=True, # Telefone deve ser único para ser USERNAME_FIELD
+        blank=False, # Não pode ser branco
+        null=False   # Não pode ser nulo
+    )
     # Campo para o gênero do sócio, usando as opções definidas em CHAR_CHOICES
     genero = models.CharField("Gênero", max_length=1, choices=CHAR_CHOICES, blank=True, null=True)
     # Campo para a data de nascimento do sócio
@@ -63,8 +93,8 @@ class CustomUser(AbstractUser):
         _('CPF'),
         max_length=14,
         unique=True,
-        null=False,  # Alterado para True
-        blank=False, # Adicionado/Alterado para True para consistência inicial
+        null=False, 
+        blank=False, 
         help_text=_('Formato: 000.000.000-00')
     )
 
@@ -98,6 +128,14 @@ class CustomUser(AbstractUser):
         related_query_name="user",
     )
 
+    # Adicionando campo para foto de perfil
+    profile_picture = models.ImageField(
+        _('profile picture'),
+        upload_to=user_profile_pic_path,  # Função customizada para o caminho
+        null=True,
+        blank=True
+    )
+
     class Meta:
         # Define nomes mais amigáveis para o modelo no painel administrativo
         verbose_name = "Sócio"
@@ -105,8 +143,8 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         # Define a representação em string do objeto CustomUser
-        # Retorna o email, ou o username se o email não estiver definido (improvável com unique=True)
-        return self.email or self.username
+        # Retorna o telefone, que agora é o USERNAME_FIELD
+        return self.telefone
 
     # Método auxiliar para verificar se o usuário possui privilégios administrativos
     def has_administrative_privileges(self):
@@ -115,3 +153,19 @@ class CustomUser(AbstractUser):
         admin_roles = ["Mestre Representante", "Mestre-Assistente", "Presidente"]
         # Verifica se algum dos cargos do usuário está na lista de cargos administrativos
         return self.cargos.filter(nome__in=admin_roles).exists()
+
+    # Sobrescrever o método save para deletar a foto antiga se uma nova for carregada
+    # ou se a foto for limpa.
+    def save(self, *args, **kwargs):
+        try:
+            this = CustomUser.objects.get(id=self.id)
+            if this.profile_picture != self.profile_picture:
+                if this.profile_picture: # Verifica se a foto antiga existe
+                    if os.path.isfile(this.profile_picture.path):
+                        os.remove(this.profile_picture.path)
+        except CustomUser.DoesNotExist: 
+            pass # Objeto é novo, não há foto antiga
+        except ValueError:
+            pass # Pode ocorrer se o campo de imagem estiver vazio e .path for acessado
+
+        super(CustomUser, self).save(*args, **kwargs)

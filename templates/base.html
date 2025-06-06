@@ -15,6 +15,11 @@
             background-color: #f8f9fa; /* Cor de fundo um pouco mais clara */
             color: #343a40; /* Cor de texto principal */
             line-height: 1.6;
+            transition: padding-left 0.3s ease; /* Para animar o conteúdo principal */
+            box-sizing: border-box; /* Adicionado para consistência */
+        }
+        *, *::before, *::after { /* Aplicar box-sizing globalmente é uma boa prática */
+            box-sizing: inherit;
         }
         .page-wrapper {
             display: flex;
@@ -24,22 +29,141 @@
         header.main-header { /* Classe para o header principal */
             background-color: #00447C; /* Azul escuro da UDV */
             color: white;
-            padding: 15px 30px; /* Padding ajustado */
-            text-align: center;
+            padding: 10px 20px; /* Padding ajustado */
+            display: flex; /* Para alinhar o botão de menu e o título */
+            align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed; /* Fixa o header no topo */
+            top: 0;
+            left: 0;
+            width: calc(100% - 40px); /* Considera o padding */
+            z-index: 1000; /* Garante que o header fique acima de outros conteúdos */
+            box-sizing: border-box; /* Adicionado */
+        }
+        .menu-toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 5px;
         }
         header.main-header h1 {
             margin: 0;
-            font-size: 22px; /* Tamanho da fonte ajustado */
+            font-size: 20px; /* Tamanho da fonte ajustado */
             font-weight: 500;
+            text-align: center; /* Centraliza o título se o botão ocupar espaço */
+            flex-grow: 1; /* Permite que o título ocupe o espaço restante */
         }
+
+        .main-layout {
+            display: flex;
+            padding-top: 60px; /* Altura do header fixo */
+            flex-grow: 1;
+        }
+
+        .sidebar {
+            width: 260px; 
+            background-color: #f0f2f5; 
+            padding: 20px;
+            border-right: 1px solid #d1d9e0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            overflow-y: auto; 
+            position: fixed; /* Sidebar fixa */
+            top: 60px; /* Abaixo do header */
+            left: -260px; /* Começa oculta */
+            height: calc(100vh - 60px); /* Altura total menos o header */
+            z-index: 999; /* Abaixo do header, mas acima do conteúdo */
+            transition: left 0.3s ease;
+            box-sizing: border-box; /* Adicionado */
+        }
+        body.sidebar-active .sidebar {
+            left: 0; /* Mostra a sidebar */
+        }
+        body.sidebar-active main.content-area {
+            padding-left: 260px; /* Ajustado de 280px para 260px (largura da sidebar) */
+        }
+
+        /* Estilos da sidebar (copiados e adaptados de home.html) */
+        .sidebar .profile-section {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #d1d9e0;
+        }
+        .sidebar .profile-section img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #00447C;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
+        .sidebar .profile-section .username {
+            font-weight: 600;
+            color: #00447C;
+            font-size: 1.1em;
+            margin-top: 5px;
+        }
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar nav > ul > li {
+            margin-bottom: 8px;
+        }
+        .sidebar nav ul li a {
+            display: block;
+            padding: 12px 18px;
+            color: #343a40;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .sidebar nav ul li a:hover, 
+        .sidebar nav ul li a.active { /* .active para o link da página atual */
+            background-color: #0056b3;
+            color: white;
+        }
+        .sidebar nav ul.submenu {
+            padding-left: 25px;
+            margin-top: 5px;
+            display: none; 
+            background-color: rgba(0,0,0,0.02);
+            border-radius: 4px;
+        }
+        .sidebar nav ul.submenu li a {
+            padding: 10px 15px;
+            font-size: 0.9em;
+            font-weight: normal;
+            color: #495057;
+        }
+        .sidebar nav ul.submenu li a:hover {
+            background-color: #0069d9;
+            color: white;
+        }
+        .sidebar nav ul > li.open > ul.submenu {
+            display: block;
+        }
+        .sidebar nav > ul > li.menu-separator {
+            height: 1px;
+            background-color: #d1d9e0;
+            margin: 15px 0;
+        }
+
+
         main.content-area { /* Classe para a área de conteúdo principal */
             flex-grow: 1;
             width: 100%;
-            max-width: 1200px; /* Limita a largura máxima do conteúdo */
-            margin: 0 auto; /* Centraliza o conteúdo */
-            padding: 20px; /* Espaçamento interno */
-            box-sizing: border-box;
+            /* max-width: 1200px; Removido para permitir que o padding-left funcione bem */
+            margin: 0 auto; 
+            padding: 20px; 
+            box-sizing: border-box; /* Já estava aqui, ótimo */
+            transition: padding-left 0.3s ease; /* Para animar o conteúdo principal */
         }
         footer.main-footer { /* Classe para o rodapé principal */
             background-color: #343a40; /* Cinza escuro */
@@ -47,10 +171,13 @@
             padding: 20px 30px;
             text-align: center;
             font-size: 14px;
+            transition: padding-left 0.3s ease; /* Para animar o rodapé junto com o conteúdo */
+            box-sizing: border-box; /* Adicionado */
         }
-        footer.main-footer p {
-            margin: 0;
+        body.sidebar-active footer.main-footer {
+            padding-left: 260px; /* Ajustado de 280px para 260px (largura da sidebar) */
         }
+
         /* Estilos para mensagens do Django */
         .messages { list-style: none; padding: 0; margin: 0 0 20px 0; }
         .messages li {
@@ -68,33 +195,176 @@
         /* Estilos básicos para links e botões, podem ser sobrescritos */
         a { color: #0056b3; text-decoration: none; }
         a:hover { text-decoration: underline; }
+
+        /* Media query para telas maiores onde a sidebar pode ser sempre visível */
+        @media (min-width: 992px) {
+            body {
+                padding-left: 260px; /* Espaço permanente para a sidebar */
+            }
+            .sidebar {
+                left: 0; /* Sidebar sempre visível */
+            }
+            .menu-toggle-btn {
+                display: none; /* Oculta o botão em telas grandes */
+            }
+            /* Quando a sidebar está "sempre ativa" em telas grandes, o body já tem padding-left.
+               O padding-left do content-area e footer deve ser o seu padding interno normal. */
+            body.sidebar-active main.content-area {
+                 padding-left: 20px; /* Mantido - padding interno do content-area */
+            }
+             body.sidebar-active footer.main-footer {
+                padding-left: 30px; /* Mantido - padding interno do footer (era 30px no padding geral) */
+            }
+        }
+
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body {% if request.user.is_authenticated %}class="sidebar-active"{% endif %}> <!-- Começa com sidebar ativa se autenticado em telas grandes -->
     <div class="page-wrapper">
         <header class="main-header">
+            <button id="menuToggleButton" class="menu-toggle-btn">☰</button>
             <h1>Centro Espírita Beneficente União do Vegetal - Núcleo Natal</h1>
         </header>
 
-        <main class="content-area">
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        <li class="{{ message.tags }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
+        <div class="main-layout">
+            {% if request.user.is_authenticated %}
+            <aside class="sidebar">
+                <div class="profile-section">
+                    <!-- A imagem de perfil e nome do usuário virão do contexto -->
+                    {% if request.user.profile_picture %}
+                        <img src="{{ request.user.profile_picture.url }}" alt="Foto do Perfil">
+                    {% else %}
+                        <img src="{% static 'core/images/default_profile.png' %}" alt="Foto Padrão do Perfil">
+                    {% endif %}
+                    <p class="username">{{ request.user.get_full_name|default:request.user.username }}</p>
+                </div>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="#meu-perfil-menu-toggle">Meu Perfil</a>
+                            <ul class="submenu">
+                                <li><a href="{% url 'profile_edit_page' %}">Editar Perfil</a></li>
+                            </ul>
+                        </li>
+                        <li class="menu-separator"></li>
+                        <li>
+                            <a href="#atividades-menu-toggle">Atividades</a>
+                            <ul class="submenu">
+                                <li><a href="{% url 'core_home' %}" {% if request.resolver_match.url_name == 'core_home' %}class="active"{% endif %}>Calendário</a></li>
+                                <li><a href="#">Minha Equipe</a></li>
+                                <li><a href="#">Escalas</a></li>
+                                {% if perms.activities.add_evento %}
+                                <li><a href="{% url 'activities:schedule_event' %}">Agendar Evento</a></li>
+                                {% endif %}
+                                {% if perms.activities.change_escala %} 
+                                <li><a href="#">Editar Escalas</a></li>
+                                {% endif %}
+                                {% if perms.activities.change_equipe %}
+                                <li><a href="#">Editar Equipes</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        <li class="menu-separator"></li>
+                        <li>
+                            <a href="#rifas-menu-toggle">Rifas</a>
+                            <ul class="submenu">
+                                <li><a href="#">Ver Rifas</a></li>
+                                {% if perms.rifas.add_rifa %}
+                                <li><a href="#">Cadastrar Rifa</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        <li class="menu-separator"></li>
+                        <li>
+                            <a href="#caronas-menu-toggle">Caronas</a>
+                            <ul class="submenu">
+                                <li><a href="#">Buscar Carona</a></li>
+                                <li><a href="#">Oferecer Carona</a></li>
+                            </ul>
+                        </li>
+                        
+                        {% if perms.accounts.view_user_details or perms.core.view_reports %}
+                        <li class="menu-separator"></li>
+                        <li>
+                            <a href="#assistencia-menu-toggle">Assistência</a>
+                            <ul class="submenu">
+                                {% if perms.accounts.view_user_details %}
+                                <li><a href="#">Quadro de Sócios</a></li>
+                                {% endif %}
+                                {% if perms.core.view_reports %}
+                                <li><a href="#">Relatório de Eventos</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                        <li class="menu-separator"></li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit">Sair</button>
+                            </form>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
             {% endif %}
-            
-            {% block content %}
-            <!-- O conteúdo específico da página virá aqui -->
-            {% endblock %}
-        </main>
+
+            <main class="content-area">
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                
+                {% block content %}
+                <!-- O conteúdo específico da página virá aqui -->
+                {% endblock %}
+            </main>
+        </div>
 
         <footer class="main-footer">
             <p>&copy; 1961 - {% now "Y" %} Centro Espírita Beneficente União do Vegetal. Todos os direitos reservados.</p>
         </footer>
     </div>
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuToggleButton = document.getElementById('menuToggleButton');
+            if (menuToggleButton) {
+                menuToggleButton.addEventListener('click', function() {
+                    document.body.classList.toggle('sidebar-active');
+                });
+            }
+
+            // Script para toggle dos submenus da sidebar
+            const menuLinks = document.querySelectorAll('.sidebar nav > ul > li > a');
+            menuLinks.forEach(link => {
+                const submenu = link.nextElementSibling;
+                // Verifica se o href do link começa com # para identificá-lo como um toggle de submenu
+                if (submenu && submenu.classList.contains('submenu') && link.getAttribute('href').startsWith('#')) {
+                    link.addEventListener('click', function(event) {
+                        event.preventDefault(); // Previne o comportamento padrão do link
+                        
+                        const parentLi = link.parentElement;
+                        const currentlyOpen = parentLi.classList.contains('open');
+
+                        // Fecha todos os outros submenus abertos no mesmo nível
+                        document.querySelectorAll('.sidebar nav > ul > li.open').forEach(openLi => {
+                            if (openLi !== parentLi) {
+                                openLi.classList.remove('open');
+                            }
+                        });
+
+                        // Alterna o estado do submenu atual
+                        parentLi.classList.toggle('open', !currentlyOpen);
+                    });
+                }
+            });
+        });
+    </script>
+    {% endblock %}
 </body>
 </html>

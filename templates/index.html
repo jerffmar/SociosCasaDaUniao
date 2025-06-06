@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Sócios - Casa da União</title>
+    <title>Login - Gestão de Sócios - Casa da União</title>
+    <script>
+        // A URL da foto de perfil padrão pode não ser necessária aqui, mas mantida por ora.
+        const defaultProfilePicUrl = "{% static 'core/images/default_profile.png' %}";
+        console.log("DEBUG: URL da foto de perfil padrão (global fallback):", defaultProfilePicUrl);
+    </script>
     <style>
         html { height: 100%; }
         body { 
@@ -15,7 +20,14 @@
             flex-direction: column; 
             min-height: 100vh; 
         }
-        .header, .footer { background-color: #00447c; color: white; text-align: center; padding: 15px; width: 100%; flex-shrink: 0;}
+        .header, .footer { 
+            background-color: #00447c; 
+            color: white; 
+            text-align: center; 
+            padding: 15px; 
+            width: 100%; 
+            flex-shrink: 0;
+        }
         .header h1 { margin: 0; font-size: 1.5em; }
         .footer p { margin: 0; font-size: 0.9em; }
         
@@ -25,69 +37,210 @@
             display: flex;
             flex-direction: column;
             align-items: center; 
-            justify-content: center; /* Adicionado para centralizar verticalmente o conteúdo */
+            justify-content: center;
             padding-top: 20px; 
             padding-bottom: 20px; 
         }
 
         .container { 
-            background-color: #ADD8E6; /* Alterado de white para azul bebê */
+            background-color: #ADD8E6; 
             padding: 30px; 
             border-radius: 8px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15); /* Sombra um pouco mais pronunciada */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
             width: 100%; 
             max-width: 400px; 
             margin-bottom:20px; 
-            text-align: center; /* Centraliza o conteúdo do container, incluindo a logo se movida para dentro */
+            text-align: center; 
         }
         .logo-container { 
-            /* text-align: center; Removido daqui, pois o .container já centraliza */
-            margin-bottom: 20px; /* Espaço abaixo da logo */
+            margin-bottom: 20px; 
         }
         .logo-container img { 
-            max-width: 499px; /* Ajuste o tamanho da logo conforme necessário */
-            display: block; /* Para permitir margin auto se necessário */
-            margin-left: auto; /* Centraliza a imagem se ela for menor que o container */
+            max-width: 100%; /* Ajustado para ser responsivo dentro do container */
+            height: auto; /* Mantém a proporção da imagem */
+            display: block; 
+            margin-left: auto; 
             margin-right: auto;
         }
         h2 { 
             text-align: center; 
             color: #333; 
             margin-top: 0; 
-            margin-bottom: 25px; /* Mais espaço abaixo do título */
+            margin-bottom: 25px; 
         }
         label { 
             display: block; 
-            margin-bottom: 8px; /* Aumentado espaço */
+            margin-bottom: 8px; 
             color: #555; 
             font-weight: bold; 
-            text-align: left; /* Alinha labels à esquerda */
+            text-align: left; 
         }
         input[type="email"], input[type="password"], input[type="text"], input[type="tel"] {
             width: calc(100% - 22px); 
-            padding: 12px; /* Aumentado padding */
-            margin-bottom: 20px; /* Aumentado espaço */
-            border: 1px solid #ccc; /* Borda um pouco mais escura */
+            padding: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #ccc; 
             border-radius: 4px; 
             box-sizing: border-box;
             font-size: 1em;
         }
         button {
-            background-color:rgb(0, 123, 255); color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1em; margin-bottom: 10px;
+            background-color:rgb(0, 123, 255); 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 1em; 
+            margin-bottom: 10px;
         }
         button:hover { background-color: #004494; }
-        .secondary-action { background-color: #6c757d; }
-        .secondary-action:hover { background-color: #5a6268; }
-        .link-button { background: none; border: none; color: #0056b3; text-decoration: underline; cursor: pointer; padding: 0; font-size: 0.9em; display: block; text-align: center; margin-top:10px; }
-        .message { padding: 10px; margin-top: 15px; border-radius: 4px; text-align: center; display: none; }
+        
+        .link-button { 
+            background: none; 
+            border: none; 
+            color: #0056b3; 
+            text-decoration: underline; 
+            cursor: pointer; 
+            padding: 0; 
+            font-size: 0.9em; 
+            display: block; 
+            text-align: center; 
+            margin-top:10px; 
+        }
+        .message { 
+            padding: 10px; 
+            margin-top: 15px; 
+            border-radius: 4px; 
+            text-align: center; 
+            /* display: none; Removido, será exibido se houver mensagem */
+        }
         .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .page { display: none; }
-        .page.active { display: block; }
 
-        /* Estilos para o rodapé e banner de aviso */
+        /* Estilos do Calendário (Movidos e Adaptados de home.html) */
+        .calendar-widget-container { /* Novo container para o calendário na index */
+            background-color: #fff; /* Fundo branco para o widget do calendário */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px; /* Ajuste a largura conforme necessário */
+            margin-top: 30px; /* Espaço acima do calendário */
+            margin-bottom: 20px;
+            text-align: left; /* Alinha o conteúdo do calendário à esquerda */
+        }
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .calendar th, .calendar td {
+            border: 1px solid #ddd;
+            padding: 8px; /* Padding menor para index */
+            text-align: center;
+            vertical-align: top;
+            height: 60px; /* Altura menor para as células */
+        }
+        .calendar th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-header h4 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .calendar-nav-btn {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 6px 10px; /* Botões menores */
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .calendar-nav-btn:hover {
+            background-color: #004494;
+        }
+        .calendar td.today {
+            background-color: #e6f7ff;
+            font-weight: bold;
+        }
+        .calendar td.other-month {
+            color: #aaa;
+            background-color: #f9f9f9;
+        }
+        .calendar td.has-event {
+            background-color: #d4edda; 
+            cursor: pointer;
+        }
+        .calendar td.has-event:hover {
+            background-color: #c3e6cb;
+        }
+        .calendar .day-number {
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .calendar .event-marker {
+            display: block;
+            font-size: 0.7em;
+            margin-top: 3px;
+            color: #155724;
+            background-color: #ffffff;
+            padding: 1px 2px;
+            border-radius: 2px;
+            border: 1px solid #c3e6cb;
+        }
+        .event-details-popup { /* Estilo para o popup de detalhes do evento */
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1001; /* Acima do overlay */
+            width: 90%;
+            max-width: 400px;
+        }
+        .event-details-popup h5 { margin-top: 0; color: #0056b3;}
+        .event-details-popup p { font-size: 0.9em; margin-bottom: 8px;}
+        .event-details-popup button.close-popup {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            margin-top: 10px;
+        }
+         .event-details-popup button.close-popup:hover { background-color: #c82333; }
+        .popup-overlay { /* Overlay para o fundo */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+
+        /* Estilos para o rodapé e banner de aviso (mantidos se forem genéricos para páginas não autenticadas) */
         .footer-link {
-            color: #ADD8E6; /* LightBlue, para combinar com o fundo do rodapé */
+            color: #ADD8E6; 
             text-decoration: none;
             font-size: 0.85em;
         }
@@ -96,786 +249,67 @@
         }
 
         .consent-banner {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: #343a40;
-            color: white;
-            padding: 15px;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            flex-direction: row;
+            /* Estilos do banner de consentimento, se aplicável a esta página */
         }
-        .consent-banner p {
-            margin: 0;
-            flex-grow: 1; /* Ocupa espaço disponível */
-            font-size: 0.9em;
-        }
-        /* Link dentro do banner */
-        .banner-privacy-link {
-            color: #87CEFA; /* LightSkyBlue, para destacar no fundo escuro */
-            text-decoration: underline;
-        }
-        .banner-privacy-link:hover {
-            color: #ADD8E6; /* LightBlue */
-        }
+        /* ... outros estilos de consent-banner e privacy-policy se forem relevantes ... */
 
-        .consent-banner button {
-            background-color: #0056b3;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .consent-banner button:hover {
-            background-color: #004494;
-        }
-
-        /* Estilos para a página de política de privacidade */
-        #privacyPolicyPage h4 {
-            margin-top: 20px;
-            margin-bottom: 10px;
-            color: #00447c;
-        }
-        #privacyPolicyPage p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        /* Estilos para o Dashboard */
-        .home-container {
-            display: flex;
-            min-height: calc(100vh - 120px); /* Ajuste conforme altura do seu header/footer */
-        }
-        .sidebar {
-            width: 280px;
-            background-color: #f0f2f5;
-            padding: 20px;
-            border-right: 1px solid #d1d9e0;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            overflow-y: auto;
-        }
-        .sidebar .profile-section {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #d1d9e0;
-        }
-        .sidebar .profile-section img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid #00447C;
-            margin-bottom: 12px;
-            object-fit: cover;
-        }
-        .sidebar .profile-section .username {
-            font-weight: 600;
-            color: #00447C;
-            font-size: 1.1em;
-            margin-top: 5px;
-        }
-        .sidebar nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .sidebar nav > ul > li {
-            margin-bottom: 8px;
-        }
-        .sidebar nav ul li a {
-            display: block;
-            padding: 12px 18px;
-            color: #343a40;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.95em;
-            font-weight: 500;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .sidebar nav ul li a:hover, 
-        .sidebar nav ul li a.active-main-menu { /* Classe para item principal ativo */
-            background-color: #0056b3;
-            color: white;
-        }
-        .sidebar nav ul.submenu {
-            padding-left: 25px;
-            margin-top: 5px;
-            display: none; /* Submenus ocultos por padrão */
-            background-color: rgba(0,0,0,0.02);
-            border-radius: 4px;
-        }
-        .sidebar nav ul.submenu li a {
-            padding: 10px 15px;
-            font-size: 0.9em;
-            font-weight: normal;
-            color: #495057;
-        }
-        .sidebar nav ul.submenu li a:hover,
-        .sidebar nav ul.submenu li a.active-submenu { /* Classe para subitem ativo */
-            background-color: #0069d9;
-            color: white;
-        }
-        .sidebar nav ul > li.open > ul.submenu {
-            display: block;
-        }
-        .sidebar nav > ul > li.menu-separator {
-            height: 1px;
-            background-color: #d1d9e0;
-            margin: 15px 0;
-        }
-
-        .main-content-area {
-            flex-grow: 1;
-            padding: 25px;
-            background-color: #ffffff;
-        }
-        .main-content-area h2 {
-            color: #00447C;
-            margin-top: 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #00447C;
-            padding-bottom: 10px;
-        }
-        .content-grid {
-            display: flex;
-            gap: 25px;
-        }
-        .calendar-container {
-            flex: 3;
-        }
-        .event-details-container {
-            flex: 2;
-        }
-        .balloon {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-        }
-        .balloon h4 {
-            color: #0056b3;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        .placeholder-text {
-            color: #6c757d;
-            text-align: center;
-            padding: 40px 20px;
-            border: 2px dashed #ced4da;
-            border-radius: 6px;
-            min-height: 150px; /* Ajustado */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .dashboard-content-section { /* Classe para todas as seções de conteúdo do dashboard */
-            /* Estilos comuns se necessário */
-        }
-
-        /* Estilos para itens de admin (opcional, controle via JS é mais robusto) */
-        .admin-only-item {
-            /* display: none;  Será controlado por JS */
-        }
     </style>
 </head>
 <body>
-
     <header class="header">
         <h1>Centro Espírita Beneficente União do Vegetal - Núcleo Natal</h1>
     </header>
 
-    <main class="main-content-wrapper">
-
-        <!-- Página de Login -->
-        <div id="loginPage" class="container page active">
-            <div class="logo-container"> <!-- Logo movida para dentro do balão de login -->
-                <img src="https://udv.org.br/thoroazo/2016/09/centro-espirita-beneficente-uniao-do-vegetal1.png" alt="Logo Casa da União">
+    <div class="main-content-wrapper">
+        <div class="container" id="loginPage">
+            <div class="logo-container">
+                <img src="{% static 'core/images/logo_udv.png' %}" alt="Logo UDV"> {# Ajuste o caminho da sua logo #}
             </div>
-            <h2>Portal de Membros</h2> <!-- Texto alterado -->
-            <form method="post" action="{% url 'accounts:login' %}" id="loginForm">
-                <label for="loginPhone">Telefone:</label>
-                <input type="tel" id="loginPhone" name="phone" required placeholder="(XX) XXXXX-XXXX">
-                <label for="loginPassword">Senha:</label>
-                <input type="password" id="loginPassword" name="password" required>
-                <button type="submit">Entrar</button>
-            </form>
-            <button type="button" class="secondary-action" onclick="showPage('registrationPage')">Cadastre-se</button>
-            <a href="#" id="showResetPasswordLink" class="link-button">Recuperar Acesso</a>
-            <p class="message" id="loginMessage"></p>
-        </div>
-
-        <!-- Página de Cadastro -->
-        <div id="registrationPage" class="container page">
-            <!-- Se a logo também for desejada aqui, adicione o .logo-container aqui também -->
-            <h2>Cadastre-se</h2>
-            <form id="registrationForm">
-                <label for="regName">Nome Completo:</label>
-                <input type="text" id="regName" name="nome_completo" required>
-
-                <label for="regPhonePrincipal">Telefone Principal (para login):</label>
-                <input type="tel" id="regPhonePrincipal" name="telefone" required placeholder="(XX) XXXXX-XXXX">
-                
-                <label for="regEmail">Email (opcional, para recuperação):</label>
-                <input type="email" id="regEmail" name="email">
-
-                <label for="regBirthDate">Data de Nascimento:</label>
-                <input type="date" id="regBirthDate" name="data_nascimento" required> 
-
-                <label for="regPassword">Senha:</label>
-                <input type="password" id="regPassword" name="password" required>
-
-                <label for="regConfirmPassword">Confirmar Senha:</label>
-                <input type="password" id="regConfirmPassword" name="password2" required> 
-                <label for="regCpf">CPF:</label>
-                <input type="text" id="regCpf" name="cpf" required placeholder="000.000.000-00">
-
-                <button type="submit">Cadastrar</button>
-            </form>
-            <button type="button" class="secondary-action" onclick="showPage('loginPage')">Já tenho conta</button>
-            <p class="message" id="registrationMessage"></p>
-        </div>
-
-        <!-- Página de Recuperação de Senha (Solicitação) -->
-        <div id="resetPasswordPage" class="container page">
-            <h2>Redefinir Senha</h2>
-            <p>Informe seu CPF, data de nascimento e telefone cadastrados para redefinir sua senha.</p>
-            <form id="resetPasswordForm">
-                <label for="resetCpf">CPF:</label>
-                <input type="text" id="resetCpf" name="cpf" required placeholder="000.000.000-00">
-
-                <label for="resetBirthDate">Data de Nascimento:</label>
-                <input type="date" id="resetBirthDate" name="data_nascimento" required>
-
-                <label for="resetPhone">Telefone Cadastrado:</label>
-                <input type="tel" id="resetPhone" name="phone" required placeholder="(XX) XXXXX-XXXX">
-                
-                <button type="submit">Redefinir Senha</button>
-            </form>
-            <button type="button" class="secondary-action" onclick="showPage('loginPage')">Voltar para Login</button>
-            <p class="message" id="resetMessage"></p>
-        </div>
-
-        <!-- Página do Dashboard (exemplo) -->
-        <div id="dashboardPage" class="page" style="display: none;">
-            <div class="home-container"> <!-- Classe para estilização similar a core/home.html -->
-                <aside class="sidebar">
-                    <div class="profile-section">
-                        <img id="userDashboardProfilePic" src="{% static 'core/images/default_profile.png' %}" alt="Foto do Perfil">
-                        <p id="userDashboardProfileName" class="username">Carregando...</p>
+            <h2>Login</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
                     </div>
-                    <nav>
-                        <ul>
-                            <li>
-                                <a href="#meu-perfil-menu" class="menu-toggle">Meu Perfil</a>
-                                <ul class="submenu">
-                                    <li><a href="#" onclick="showDashboardContent('editProfilePageContent'); return false;">Editar Perfil</a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-separator"></li>
-                            <li>
-                                <a href="#atividades-menu" class="menu-toggle">Atividades</a>
-                                <ul class="submenu">
-                                    <li><a href="#" onclick="showDashboardContent('calendarPageContent'); return false;">Calendário</a></li>
-                                    <li><a href="#" onclick="showDashboardContent('myTeamPageContent'); return false;">Minha Equipe</a></li>
-                                    <li><a href="#" onclick="showDashboardContent('scalesPageContent'); return false;">Escalas</a></li>
-                                    <!-- Links para admin (Agendar Evento, etc.) podem ser adicionados/mostrados com JS -->
-                                    <li class="admin-only-item" style="display:none;"><a href="#" onclick="showDashboardContent('scheduleEventPageContent'); return false;">Agendar Evento</a></li>
-                                    <li class="admin-only-item" style="display:none;"><a href="#" onclick="showDashboardContent('editScalesPageContent'); return false;">Editar Escalas</a></li>
-                                    <li class="admin-only-item" style="display:none;"><a href="#" onclick="showDashboardContent('editTeamsPageContent'); return false;">Editar Equipes</a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-separator"></li>
-                            <li>
-                                <a href="#rifas-menu" class="menu-toggle">Rifas</a>
-                                <ul class="submenu">
-                                    <li><a href="#" onclick="showDashboardContent('viewRafflesPageContent'); return false;">Ver Rifas</a></li>
-                                    <li class="admin-only-item" style="display:none;"><a href="#" onclick="showDashboardContent('createRafflePageContent'); return false;">Cadastrar Rifa</a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-separator"></li>
-                            <li>
-                                <a href="#caronas-menu" class="menu-toggle">Caronas</a>
-                                <ul class="submenu">
-                                    <li><a href="#" onclick="showDashboardContent('findRidePageContent'); return false;">Buscar Carona</a></li>
-                                    <li><a href="#" onclick="showDashboardContent('offerRidePageContent'); return false;">Oferecer Carona</a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-separator admin-only-item" style="display:none;"></li>
-                            <li class="admin-only-item" style="display:none;">
-                                <a href="#assistencia-menu" class="menu-toggle">Assistência</a>
-                                <ul class="submenu">
-                                    <li><a href="#" onclick="showDashboardContent('membersRegistryPageContent'); return false;">Quadro de Sócios</a></li>
-                                    <li><a href="#" onclick="showDashboardContent('eventsReportPageContent'); return false;">Relatório de Eventos</a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-separator"></li>
-                            <li><a href="#" id="dashboardLogoutButton">Sair</a></li>
-                        </ul>
-                    </nav>
-                </aside>
+                {% endfor %}
+            {% endif %}
 
-                <section class="main-content-area">
-                    <!-- Conteúdo Padrão Inicial (Calendário) -->
-                    <div id="calendarPageContent" class="dashboard-content-section">
-                        <h2>Calendário de Atividades</h2>
-                        <div class="balloon">
-                            <p>Este é o seu painel principal. O calendário abaixo exibirá os eventos agendados. Clique em uma data com evento para ver os detalhes ao lado.</p>
-                        </div>
-                        <div class="content-grid">
-                            <div class="calendar-container balloon">
-                                <h4>Calendário do Mês</h4>
-                                <div class="placeholder-text">[ Implementação do Calendário Interativo Aqui ]</div>
-                            </div>
-                            <div class="event-details-container balloon" id="dashboardNotificationsArea">
-                                <h4>Notificações / Detalhes do Evento</h4>
-                                <div class="placeholder-text" id="dashboardEventDetailsPlaceholder">Selecione um evento no calendário.</div>
-                            </div>
-                        </div>
-                         <div class="balloon" id="dashboardDynamicFooterCalendar">
-                            <p>Conteúdo dinâmico conforme seleção de datas.</p>
-                        </div>
-                    </div>
+            {% if form.non_field_errors %}
+                <div class="message error">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-                    <!-- Outras seções de conteúdo (inicialmente ocultas) -->
-                    <div id="editProfilePageContent" class="dashboard-content-section" style="display: none;"><h2>Editar Perfil</h2><p>Formulário de Edição do Perfil...</p></div>
-                    <div id="myTeamPageContent" class="dashboard-content-section" style="display: none;"><h2>Minha Equipe</h2><p>Informações da sua equipe...</p></div>
-                    <div id="scalesPageContent" class="dashboard-content-section" style="display: none;"><h2>Escalas</h2><p>Visualização das escalas de atividades...</p></div>
-                    <div id="scheduleEventPageContent" class="dashboard-content-section" style="display: none;"><h2>Agendar Evento</h2><p>Formulário para agendar novo evento...</p></div>
-                    <div id="editScalesPageContent" class="dashboard-content-section" style="display: none;"><h2>Editar Escalas</h2><p>Interface para editar escalas...</p></div>
-                    <div id="editTeamsPageContent" class="dashboard-content-section" style="display: none;"><h2>Editar Equipes</h2><p>Interface para editar equipes...</p></div>
-                    <div id="viewRafflesPageContent" class="dashboard-content-section" style="display: none;"><h2>Ver Rifas</h2><p>Listagem de rifas disponíveis...</p></div>
-                    <div id="createRafflePageContent" class="dashboard-content-section" style="display: none;"><h2>Cadastrar Rifa</h2><p>Formulário para cadastrar nova rifa...</p></div>
-                    <div id="findRidePageContent" class="dashboard-content-section" style="display: none;"><h2>Buscar Carona</h2><p>Interface para buscar carona...</p></div>
-                    <div id="offerRidePageContent" class="dashboard-content-section" style="display: none;"><h2>Oferecer Carona</h2><p>Formulário para oferecer carona...</p></div>
-                    <div id="membersRegistryPageContent" class="dashboard-content-section" style="display: none;"><h2>Quadro de Sócios</h2><p>Tabela com informações dos sócios...</p></div>
-                    <div id="eventsReportPageContent" class="dashboard-content-section" style="display: none;"><h2>Relatório de Eventos</h2><p>Relatório de eventos realizados...</p></div>
-                </section>
-            </div>
+            <form method="post" action="{% url 'login' %}"> {# Ou a URL da sua view de login #}
+                {% csrf_token %}
+                <div>
+                    <label for="id_username">Telefone:</label> {# Assumindo que o campo é 'username' no form, mas o label é Telefone #}
+                    {{ form.username }} {# Ou o nome do campo de telefone/login do seu formulário #}
+                    {% if form.username.errors %}
+                        <div class="message error" style="text-align: left; padding: 5px; font-size: 0.8em;">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="id_password">Senha:</label>
+                    {{ form.password }}
+                     {% if form.password.errors %}
+                        <div class="message error" style="text-align: left; padding: 5px; font-size: 0.8em;">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <a href="{% url 'register_page' %}" class="link-button">Cadastre-se</a>
+            <a href="{% url 'password_recovery_page' %}" class="link-button">Recuperar Acesso</a>
         </div>
 
-    </main>
-
-    <footer class="footer">
-        <p>© 1961 a 2025 - Centro Espírita Beneficente União do Vegetal. Todos os direitos reservados.</p>
-        <p><a href="#" id="privacyPolicyLink" class="footer-link">Política de Proteção de Dados</a></p>
-    </footer>
-
-    <!-- Banner de Aviso de Uso Obrigatório -->
-    <div id="usageNoticeBanner" class="consent-banner">
-        <p>Para utilizar o Portal de Membros, é necessário aceitar o uso de cookies essenciais e permitir notificações do navegador. Estas funcionalidades são cruciais para a operação do sistema. <a href="#" id="privacyLinkFromBanner" class="banner-privacy-link">Saiba mais sobre nossa política de dados.</a></p>
-        <button id="acceptUsageButton">Entendi e Aceito</button>
     </div>
 
-    <script>
-        // Definições de URL da API (Mantenha apenas estas)
-        const API_BASE_URL = 'http://127.0.0.1:8000'; // Base URL da sua API Django
-        const API_TOKEN_BASE_URL = `${API_BASE_URL}/api`;
-        const API_ACCOUNTS_BASE_URL = `${API_BASE_URL}/api/accounts`;
-
-        const API_LOGIN_URL = `${API_TOKEN_BASE_URL}/login/`; 
-        const API_REGISTER_URL = `${API_ACCOUNTS_BASE_URL}/register/`; // Corrigido para usar a rota de accounts
-        const API_DIRECT_PASSWORD_RESET_URL = `${API_ACCOUNTS_BASE_URL}/password-reset/direct/`;
-
-        // Elementos DOM
-        const loginPage = document.getElementById('loginPage');
-        const registrationPage = document.getElementById('registrationPage');
-        const dashboardPage = document.getElementById('dashboardPage'); // Certifique-se que este elemento existe no HTML se for usado
-        const privacyPolicyPage = document.getElementById('privacyPolicyPage'); 
-        const resetPasswordPage = document.getElementById('resetPasswordPage'); 
-        
-        const loginForm = document.getElementById('loginForm');
-        const registrationForm = document.getElementById('registrationForm');
-        const resetPasswordForm = document.getElementById('resetPasswordForm');
-        
-        const loginMessage = document.getElementById('loginMessage'); // Adicionado para consistência
-        const registrationMessage = document.getElementById('registrationMessage'); // Adicionado para consistência
-        const resetMessage = document.getElementById('resetMessage');
-        
-        const loginPhoneInput = document.getElementById('loginPhone'); // Adicionado para o loginForm
-        const regPhonePrincipalInput = document.getElementById('regPhonePrincipal'); // Adicionado para o registrationForm
-
-        const resetPhoneInput = document.getElementById('resetPhone');
-        const resetCpfInput = document.getElementById('resetCpf'); 
-        const resetBirthDateInput = document.getElementById('resetBirthDate'); 
-
-        // Variáveis de estado (se necessário)
-        // let validatedIdentifierForPasswordReset = null; // Removido pois não é mais usado
-
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); // Esconde todas as páginas
-            const targetPage = document.getElementById(pageId);
-            if (targetPage) {
-                targetPage.style.display = 'block'; // Mostra a página alvo
-                if (!targetPage.classList.contains('active')) { // Garante que a classe active seja gerenciada
-                    document.querySelectorAll('.page.active').forEach(p => p.classList.remove('active'));
-                    targetPage.classList.add('active');
-                }
-            }
-            clearMessages(); 
-        }
-
-        function displayMessage(element, message, type) {
-            if (element) { 
-                element.textContent = message;
-                element.className = `message ${type}`;
-                element.style.display = 'block';
-            }
-        }
-
-        function clearMessages() {
-            if (loginMessage) { loginMessage.style.display = 'none'; loginMessage.textContent = ''; loginMessage.className = 'message'; }
-            if (registrationMessage) { registrationMessage.style.display = 'none'; registrationMessage.textContent = ''; registrationMessage.className = 'message'; }
-            if (resetMessage) { resetMessage.style.display = 'none'; resetMessage.textContent = ''; resetMessage.className = 'message'; }
-        }
-
-        if (loginForm) { // Adicionado if para segurança
-            loginForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                clearMessages();
-                const rawPhone = loginPhoneInput.value.replace(/\D/g, '');
-                const password = document.getElementById('loginPassword').value;
-
-                if (rawPhone.length < 10 || rawPhone.length > 11) {
-                    displayMessage(loginMessage, 'Por favor, insira um número de telefone válido.', 'error');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(API_LOGIN_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phone: rawPhone, password: password }) 
-                    });
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        localStorage.setItem('accessToken', data.access); // Assumindo que a API de login retorna tokens JWT
-                        localStorage.setItem('refreshToken', data.refresh);
-                        localStorage.setItem('userIdentifier', rawPhone); 
-                        // updateUserInfo(rawPhone); // Descomente se a função e o elemento existirem
-                        showPage('dashboardPage'); // Certifique-se que 'dashboardPage' existe
-                    } else {
-                        displayMessage(loginMessage, data.detail || 'Erro no login. Verifique seu telefone e senha.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    displayMessage(loginMessage, 'Erro de conexão ao tentar fazer login.', 'error');
-                }
-            });
-        }
-
-        if (registrationForm) { // Adicionado if para segurança
-            registrationForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                clearMessages();
-                const nome_completo = document.getElementById('regName').value;
-                const email = document.getElementById('regEmail').value; 
-                const rawTelefone = regPhonePrincipalInput.value.replace(/\D/g, '');
-                const data_nascimento = document.getElementById('regBirthDate').value;
-                const password = document.getElementById('regPassword').value;
-                const password2 = document.getElementById('regConfirmPassword').value;
-                const cpf = document.getElementById('regCpf').value.replace(/\D/g, '');
-                
-                if (!nome_completo || !rawTelefone || !data_nascimento || !password || !password2 || !cpf) {
-                    displayMessage(registrationMessage, 'Todos os campos marcados com * são obrigatórios, incluindo o CPF.', 'error');
-                    return;
-                }
-                if (password !== password2) {
-                    displayMessage(registrationMessage, 'As senhas não coincidem.', 'error');
-                    return;
-                }
-                if (!rawTelefone || (rawTelefone.length < 10 || rawTelefone.length > 11)) { 
-                    displayMessage(registrationMessage, 'O Telefone Principal é obrigatório e deve ser válido.', 'error');
-                    return;
-                }
-                if (cpf.length !== 11) {
-                    displayMessage(registrationMessage, 'O CPF é obrigatório e deve conter 11 dígitos.', 'error');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(API_REGISTER_URL, { // Usa a URL de registro correta
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            nome_completo: nome_completo, 
-                            email: email,
-                            password: password, 
-                            password2: password2,
-                            telefone: rawTelefone,
-                            data_nascimento: data_nascimento,
-                            cpf: cpf 
-                        }) 
-                    });
-                    const data = await response.json();
-
-                    if (response.status === 201) {
-                        displayMessage(registrationMessage, data.message || 'Conta criada com sucesso! Faça login para continuar.', 'success');
-                        registrationForm.reset();
-                        setTimeout(() => {
-                            showPage('loginPage');
-                        }, 2500);
-                    } else {
-                        let errorMsg = data.detail || data.message || 'Erro ao cadastrar.'; // Prioriza data.detail
-                        if (typeof data === 'object' && !data.detail && !data.message) { // Se for um objeto de erros
-                             errorMsg = Object.values(data).flat().join(' ');
-                        }
-                        displayMessage(registrationMessage, errorMsg, 'error');
-                    }
-                } catch (error) {
-                    console.error('Registration error:', error);
-                    displayMessage(registrationMessage, 'Erro de conexão ao tentar cadastrar.', 'error');
-                }
-            });
-        }
-        
-        // Função updateUserInfo (descomente e defina userInfoDisplay se for usar)
-        // const userInfoDisplay = document.getElementById('userInfoDisplay'); // Exemplo
-        // function updateUserInfo(identifier) { 
-        //     if (userInfoDisplay) {
-        //         userInfoDisplay.textContent = `Usuário: ${identifier || 'Não identificado'}`;
-        //     }
-        // }
-
-        function logoutUser() {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('userIdentifier');
-            showPage('loginPage');
-        }
-        
-        // Manipulador para o link "Recuperar Acesso"
-        const showResetPasswordLink = document.getElementById('showResetPasswordLink');
-        if (showResetPasswordLink) {
-            showResetPasswordLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                showPage('resetPasswordPage');
-            });
-        }
-
-
-        if (resetPasswordForm) {
-            resetPasswordForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                clearMessages();
-                const rawPhone = resetPhoneInput.value.replace(/\D/g, '');
-                const cpf = resetCpfInput.value.replace(/\D/g, '');
-                const birthDate = resetBirthDateInput.value;
-
-                if (!cpf || !birthDate || !rawPhone) { 
-                    displayMessage(resetMessage, 'Por favor, preencha todos os campos: CPF, Data de Nascimento e Telefone.', 'error');
-                    return;
-                }
-                if (cpf.length !== 11) {
-                    displayMessage(resetMessage, 'CPF inválido. Deve conter 11 dígitos.', 'error');
-                    return;
-                }
-                 if (rawPhone.length < 10 || rawPhone.length > 11) {
-                    displayMessage(resetMessage, 'Telefone inválido. Deve conter 10 ou 11 dígitos.', 'error');
-                    return;
-                }
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
-                    displayMessage(resetMessage, 'Data de Nascimento inválida. Use o formato AAAA-MM-DD.', 'error');
-                    return;
-                }
-
-                try {
-                    // Certifique-se que API_DIRECT_PASSWORD_RESET_URL está sendo usada aqui
-                    const response = await fetch(API_DIRECT_PASSWORD_RESET_URL, { 
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            cpf: cpf, 
-                            data_nascimento: birthDate, 
-                            telefone: rawPhone 
-                        }) 
-                    });
-                    const data = await response.json();
-
-                    if (response.ok) { 
-                        displayMessage(resetMessage, `${data.message} Sua nova senha é: ${data.new_password}. Anote-a e guarde em local seguro. Você será redirecionado para o login em alguns segundos.`, 'success');
-                        resetPasswordForm.reset();
-                        setTimeout(() => {
-                            showPage('loginPage'); 
-                        }, 10000); 
-                    } else {
-                        displayMessage(resetMessage, data.detail || 'Dados incorretos ou não foi possível redefinir a senha.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro na redefinição de senha:', error);
-                    displayMessage(resetMessage, 'Ocorreu um erro de conexão ao tentar redefinir a senha. Tente novamente.', 'error');
-                }
-            });
-        }
-
-        // Função para mostrar conteúdo específico dentro do dashboard
-function showDashboardContent(sectionIdToShow) {
-    const contentSections = document.querySelectorAll('.dashboard-content-section');
-    contentSections.forEach(section => {
-        section.style.display = 'none'; // Oculta todas as seções de conteúdo do dashboard
-    });
-
-    const activeSection = document.getElementById(sectionIdToShow);
-    if (activeSection) {
-        activeSection.style.display = 'block'; // Mostra a seção solicitada
-    } else {
-        console.warn('Seção do dashboard não encontrada:', sectionIdToShow);
-        // Opcional: mostrar uma seção padrão se a solicitada não for encontrada
-        const defaultSection = document.getElementById('calendarPageContent');
-        if (defaultSection) defaultSection.style.display = 'block';
-    }
-
-    // Atualizar estado ativo nos links do submenu (opcional, para melhor UX)
-    document.querySelectorAll('.sidebar .submenu a').forEach(link => {
-        link.classList.remove('active-submenu');
-        if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(`showDashboardContent('${sectionIdToShow}')`)) {
-            link.classList.add('active-submenu');
-        }
-    });
-}
-
-// Lógica para o menu da sidebar (toggle de submenus)
-document.addEventListener('DOMContentLoaded', function () {
-    // ... (seu código DOMContentLoaded existente para loginForm, registrationForm, etc.) ...
-
-    const menuToggles = document.querySelectorAll('.sidebar .menu-toggle');
-    menuToggles.forEach(toggle => {
-        toggle.addEventListener('click', function(event) {
-            event.preventDefault();
-            const parentLi = this.parentElement;
-            const currentlyOpen = parentLi.classList.contains('open');
-
-            // Fecha todos os outros submenus abertos no mesmo nível
-            document.querySelectorAll('.sidebar nav > ul > li.open').forEach(openLi => {
-                if (openLi !== parentLi) {
-                    openLi.classList.remove('open');
-                }
-            });
-            // Alterna o estado do submenu atual
-            parentLi.classList.toggle('open', !currentlyOpen);
-
-            // Atualiza o estado ativo do link principal do menu
-            document.querySelectorAll('.sidebar nav > ul > li > a.menu-toggle').forEach(link => link.classList.remove('active-main-menu'));
-            if (!currentlyOpen) { // Se estava fechado e agora abriu
-                this.classList.add('active-main-menu');
-            }
-
-        });
-    });
-
-    // Botão de logout no dashboard
-    const dashboardLogoutButton = document.getElementById('dashboardLogoutButton');
-    if (dashboardLogoutButton) {
-        dashboardLogoutButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('userIdentifier'); // ou qualquer outra chave de usuário
-            // Limpar informações do usuário na UI, se houver
-            const userNameElement = document.getElementById('userDashboardProfileName');
-            if(userNameElement) userNameElement.textContent = 'Carregando...';
-            // Adicione aqui qualquer outra limpeza de UI necessária
-            
-            showPage('loginPage'); // Volta para a página de login
-        });
-    }
-    
-    // Inicializar a primeira seção do dashboard quando a dashboardPage é mostrada
-    // Isso pode ser feito na função showPage ou aqui, verificando se dashboardPage está visível
-});
-
-// Modifique sua função showPage para lidar com a inicialização do dashboard
-const originalShowPage = showPage; // Salva a referência da função original se já existir
-window.showPage = function(pageId) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
-        page.style.display = 'none';
-    });
-    const activePage = document.getElementById(pageId);
-    if (activePage) {
-        activePage.style.display = 'block';
-        if (pageId === 'dashboardPage') {
-            // Ao mostrar o dashboard, exibe o conteúdo padrão (calendário)
-            showDashboardContent('calendarPageContent'); 
-            // Aqui você também pode carregar dados do usuário para a sidebar, etc.
-            // Ex: loadUserProfileForDashboard();
-            // Ex: checkUserPermissionsForAdminItems();
-        }
-    } else {
-        console.error('Página não encontrada:', pageId);
-        // Opcional: mostrar uma página de erro ou a página de login como fallback
-        const loginPage = document.getElementById('loginPage');
-        if (loginPage) loginPage.style.display = 'block';
-    }
-}
-
-// Função para carregar dados do usuário no dashboard (exemplo)
-async function loadUserProfileForDashboard() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-
-    // Supondo que você tenha um endpoint /api/accounts/profile/ para pegar dados do usuário
-    // Este endpoint deve ser protegido e retornar dados do usuário logado
-    try {
-        const response = await fetch('/api/accounts/profile/', { // Ajuste este URL
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (response.ok) {
-            const userData = await response.json();
-            const userNameElement = document.getElementById('userDashboardProfileName');
-            const userPicElement = document.getElementById('userDashboardProfilePic');
-            if (userNameElement) {
-                userNameElement.textContent = userData.first_name && userData.last_name ? `${userData.first_name} ${userData.last_name}` : userData.email;
-            }
-            if (userPicElement && userData.profile_pic_url) { // Supondo que a API retorne profile_pic_url
-                userPicElement.src = userData.profile_pic_url;
-            }
-            // Lógica para mostrar/ocultar itens de admin baseado em userData.is_staff ou permissões
-            checkUserPermissionsForAdminItems(userData);
-
-        } else {
-            console.error('Erro ao buscar dados do perfil:', response.status);
-        }
-    } catch (error) {
-        console.error('Erro de conexão ao buscar dados do perfil:', error);
-    }
-}
-
-// Função para mostrar/ocultar itens de menu de admin (exemplo)
-function checkUserPermissionsForAdminItems(userData) {
-    const adminItems = document.querySelectorAll('.admin-only-item');
-    // Supondo que userData tenha um campo como is_staff ou um array de permissões
-    if (userData && (userData.is_staff || userData.is_superuser)) { // Ajuste esta condição
-        adminItems.forEach(item => item.style.display = 'list-item'); // ou 'block' dependendo do elemento
-    } else {
-        adminItems.forEach(item => item.style.display = 'none');
-    }
-}
-
-
-        // No seu evento de submit do loginForm, após o login bem-sucedido:
-        // ...
-        // if (response.ok) {
-        //     localStorage.setItem('accessToken', data.access);
-        //     localStorage.setItem('refreshToken', data.refresh);
-        //     localStorage.setItem('userIdentifier', data.user.phone); // Usar o telefone retornado pela API
-        
-        //     loadUserProfileForDashboard(); // Carrega os dados do usuário para o dashboard
-        //     showPage('dashboardPage'); 
-        // }
-        // ...
-    </script>
+    <footer class="footer">
+        <p>&copy; 1961 - {% now "Y" %} Centro Espírita Beneficente União do Vegetal - Núcleo Natal. Rua Lote 35 a (Chacara Grande Navio) Nisia Floresta - RN, 59.164-000</p>
+        <p><a href="#" class="footer-link">Política de Privacidade</a> | <a href="#" class="footer-link">Termos de Uso</a></p> {# Adicione links reais #}
+    </footer>
 </body>
 </html>

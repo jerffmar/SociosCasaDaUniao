@@ -1,0 +1,275 @@
+{% extends "base.html" %} 
+{% load static %}
+
+{% block title %}Editar Perfil - {{ block.super }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .edit-profile-container {
+        max-width: 700px; /* Aumentado um pouco para acomodar melhor os campos */
+        margin: 20px auto;
+        padding: 25px; /* Aumentado padding */
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .edit-profile-container h2 {
+        color: #00447C;
+        text-align: center;
+        margin-bottom: 30px; /* Aumentado margin-bottom */
+    }
+    .form-group {
+        margin-bottom: 20px; /* Aumentado margin-bottom */
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 6px; /* Ajustado margin-bottom */
+        font-weight: bold;
+        color: #333;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="date"],
+    .form-group input[type="file"],
+    .form-group select, /* Adicionado para o campo de gênero, se for um select */
+    .form-group textarea { /* Adicionado para campos de texto maiores, se houver */
+        width: 100%; /* Alterado para ocupar 100% e o box-sizing cuidar do padding/border */
+        padding: 12px; /* Aumentado padding */
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* Importante para que width: 100% inclua padding e border */
+        font-size: 1em; /* Adicionado para consistência */
+    }
+
+    /* Estilo para campos read-only para parecerem desabilitados mas ainda legíveis */
+    .form-group input[readonly] {
+        background-color: #e9ecef;
+        color: #495057;
+        cursor: not-allowed;
+    }
+
+    .profile-picture-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        margin-bottom: 10px;
+        border: 2px solid #ccc;
+        object-fit: cover; /* Garante que a imagem cubra a área sem distorcer */
+    }
+    
+    .form-actions {
+        margin-top: 30px; /* Aumentado margin-top */
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+    }
+    .form-actions button, .form-actions .btn-back { /* Aplicando a todos os botões/links no form-actions */
+        padding: 12px 25px; /* Aumentado padding */
+        border: none;
+        border-radius: 5px; /* Levemente mais arredondado */
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 500; /* Adicionado font-weight */
+        text-decoration: none; /* Para o link 'Voltar' */
+        display: inline-block; /* Para o link 'Voltar' */
+        transition: background-color 0.2s ease; /* Adicionada transição suave */
+    }
+    .form-actions .btn-save {
+        background-color: #0056b3;
+        color: white;
+    }
+    .form-actions .btn-save:hover {
+        background-color: #004494;
+    }
+    .form-actions .btn-back {
+        background-color: #6c757d;
+        color: white;
+    }
+    .form-actions .btn-back:hover {
+        background-color: #5a6268;
+    }
+
+    .errorlist { /* Estilo para erros do formulário */
+        list-style-type: none;
+        padding: 0;
+        margin: 5px 0 0 0;
+        color: #721c24; /* Cor de erro Bootstrap */
+        font-size: 0.9em;
+    }
+    .errorlist li {
+        background-color: #f8d7da; /* Fundo de erro Bootstrap */
+        border: 1px solid #f5c6cb; /* Borda de erro Bootstrap */
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin-bottom: 3px;
+    }
+    /* Estilo para mensagens gerais (sucesso, erro) que já existe em base.html, mas pode ser ajustado aqui se necessário */
+    .message { margin-bottom: 20px; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <h2>Editar Perfil</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            {# A estilização das mensagens já deve vir de base.html ou dos estilos globais #}
+            {# Se precisar de um estilo específico aqui, pode adicionar uma classe ou sobrescrever #}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="display: block; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="background: none; border: none; float: right; font-size: 1.2rem; line-height: 1; cursor: pointer;">&times;</button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.profile_picture.id_for_label }}">Foto do Perfil:</label>
+            {% if form.instance.profile_picture %}
+                <img src="{{ form.instance.profile_picture.url }}" alt="Foto do Perfil Atual" class="profile-picture-preview">
+                <p style="font-size:0.9em; margin-bottom: 5px;">Atual: {{ form.instance.profile_picture.name|cut:"profile_pics/" }}</p>
+                {% if form.profile_picture_clear %} {# Verifica se o campo de limpar existe no form #}
+                    <label for="{{ form.profile_picture_clear.id_for_label }}" style="font-weight:normal; font-size:0.9em;">
+                        {{ form.profile_picture_clear }} Remover foto atual
+                    </label>
+                {% endif %}
+                 <p style="font-size:0.9em; margin-top: 5px;">Alterar/Enviar nova foto:</p>
+            {% else %}
+                <p style="font-size:0.9em;">Nenhuma foto de perfil enviada.</p>
+            {% endif %}
+            {{ form.profile_picture }}
+            {% if form.profile_picture.errors %}<ul class="errorlist">{% for error in form.profile_picture.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.nome_completo.id_for_label }}">Nome Completo:</label>
+            {{ form.nome_completo }} 
+            {% if form.nome_completo.errors %}<ul class="errorlist">{% for error in form.nome_completo.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">Email: (não editável)</label>
+            {{ form.email }}
+            {% if form.email.errors %}<ul class="errorlist">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.telefone.id_for_label }}">Telefone:</label>
+            {{ form.telefone }}
+            {% if form.telefone.errors %}<ul class="errorlist">{% for error in form.telefone.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.data_nascimento.id_for_label }}">Data de Nascimento:</label>
+            {{ form.data_nascimento }}
+             {% if form.data_nascimento.errors %}<ul class="errorlist">{% for error in form.data_nascimento.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.cpf.id_for_label }}">CPF: (não editável)</label>
+            {{ form.cpf }}
+            {% if form.cpf.errors %}<ul class="errorlist">{% for error in form.cpf.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        
+        {% if form.genero %} {# Adicionando campo Gênero se existir no formulário #}
+        <div class="form-group">
+            <label for="{{ form.genero.id_for_label }}">Gênero:</label>
+            {{ form.genero }}
+            {% if form.genero.errors %}<ul class="errorlist">{% for error in form.genero.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endif %}
+
+        {# Campos administrativos - podem ser exibidos como read-only para o usuário comum #}
+        {# A lógica de quem pode editar deve estar no form ou na view #}
+        {% if form.cargo %}
+        <div class="form-group">
+            <label for="{{ form.cargo.id_for_label }}">Cargo(s):</label>
+            {{ form.cargo }} 
+            <small class="form-text text-muted">Seu(s) cargo(s) atual(is). Editável por administradores.</small>
+            {% if form.cargo.errors %}<ul class="errorlist">{% for error in form.cargo.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endif %}
+
+        {% if form.grau %}
+        <div class="form-group">
+            <label for="{{ form.grau.id_for_label }}">Grau:</label>
+            {{ form.grau }}
+            <small class="form-text text-muted">Seu grau atual. Editável por administradores.</small>
+            {% if form.grau.errors %}<ul class="errorlist">{% for error in form.grau.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endif %}
+
+        {% if form.equipe %}
+        <div class="form-group">
+            <label for="{{ form.equipe.id_for_label }}">Equipe:</label>
+            {{ form.equipe }}
+            <small class="form-text text-muted">Sua equipe atual. Editável por administradores.</small>
+            {% if form.equipe.errors %}<ul class="errorlist">{% for error in form.equipe.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        {% endif %}
+
+        {# Se você quiser renderizar campos não explicitamente listados acima, pode usar form.as_p ou iterar:
+           {% for field in form %}
+               {% if field.name not in "nome_completo,email,telefone,data_nascimento,cpf,profile_picture,genero,cargo,grau,equipe" %}
+                   <div class="form-group">
+                       {{ field.label_tag }}
+                       {{ field }}
+                       {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+                       {% for error in field.errors %}<div class="errorlist"><li>{{ error }}</li></div>{% endfor %}
+                   </div>
+               {% endif %}
+           {% endfor %}
+        #}
+
+        <div class="form-actions">
+            <a href="{% url 'core_home' %}" class="btn-back">Voltar</a> {# Alterado para link <a> e URL da home #}
+            <button type="submit" class="btn-save">Salvar Alterações</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }} {# Mantém scripts do base.html, se houver #}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Script para fechar alertas de mensagem (se não estiver usando Bootstrap JS completo)
+    const alertClosers = document.querySelectorAll('.alert .btn-close');
+    alertClosers.forEach(function(button) {
+        button.addEventListener('click', function() {
+            this.closest('.alert').style.display = 'none';
+        });
+    });
+
+    // Preview da imagem de perfil ao selecionar um novo arquivo
+    const profilePicInput = document.getElementById('{{ form.profile_picture.id_for_label }}');
+    if (profilePicInput) {
+        profilePicInput.addEventListener('change', function(event) {
+            const preview = document.querySelector('.profile-picture-preview');
+            if (event.target.files && event.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (preview) {
+                        preview.src = e.target.result;
+                    } else {
+                        // Se não houver preview (nenhuma foto antes), cria um
+                        const newPreview = document.createElement('img');
+                        newPreview.src = e.target.result;
+                        newPreview.alt = "Nova foto de perfil";
+                        newPreview.classList.add('profile-picture-preview');
+                        // Insere antes do input de arquivo
+                        profilePicInput.parentNode.insertBefore(newPreview, profilePicInput);
+                    }
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Gestão de Sócios - Casa da União</title>
+    <style>
+        html { height: 100%; }
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            background-color: #f4f7f6; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
+        .header, .footer { 
+            background-color: #00447c; 
+            color: white; 
+            text-align: center; 
+            padding: 15px; 
+            width: 100%; 
+            flex-shrink: 0;
+        }
+        .header h1 { margin: 0; font-size: 1.5em; }
+        .footer p { margin: 0; font-size: 0.9em; }
+        
+        .main-content-wrapper {
+            flex-grow: 1; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            padding-top: 20px; 
+            padding-bottom: 20px; 
+        }
+
+        .container { 
+            background-color: #ADD8E6; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+            width: 100%; 
+            max-width: 450px; /* Um pouco mais largo para o formulário de registro */
+            margin-bottom:20px; 
+            text-align: center; 
+        }
+        .logo-container { 
+            margin-bottom: 20px; 
+        }
+        .logo-container img { 
+            max-width: 100%;
+            height: auto;
+            display: block; 
+            margin-left: auto; 
+            margin-right: auto;
+        }
+        h2 { 
+            text-align: center; 
+            color: #333; 
+            margin-top: 0; 
+            margin-bottom: 25px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #555; 
+            font-weight: bold; 
+            text-align: left; 
+        }
+        input[type="email"], input[type="password"], input[type="text"], input[type="tel"], input[type="date"] {
+            width: calc(100% - 22px); 
+            padding: 12px; 
+            margin-bottom: 15px; /* Reduzido um pouco para formulários mais longos */
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        button {
+            background-color:rgb(0, 123, 255); 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-size: 1em; 
+            margin-bottom: 10px;
+        }
+        button:hover { background-color: #004494; }
+        
+        .link-button { 
+            background: none; 
+            border: none; 
+            color: #0056b3; 
+            text-decoration: underline; 
+            cursor: pointer; 
+            padding: 0; 
+            font-size: 0.9em; 
+            display: block; 
+            text-align: center; 
+            margin-top:10px; 
+        }
+        .message { 
+            padding: 10px; 
+            margin-bottom: 15px; /* Adicionado margin-bottom */
+            border-radius: 4px; 
+            text-align: center; 
+        }
+        .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .errorlist {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 10px;
+            list-style-type: none;
+            font-size: 0.9em;
+            text-align: left;
+        }
+        .errorlist li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Centro Espírita Beneficente União do Vegetal - Núcleo Natal</h1>
+    </header>
+
+    <div class="main-content-wrapper">
+        <div class="container" id="registerPage">
+            <div class="logo-container">
+                 <img src="{% static 'core/images/logo_udv.png' %}" alt="Logo UDV"> {# Ajuste o caminho da sua logo #}
+            </div>
+            <h2>Cadastre-se</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                {# Renderizar campos individualmente para melhor controle de estilo e erros #}
+                <div>
+                    <label for="{{ form.nome_completo.id_for_label }}">Nome Completo:</label>
+                    {{ form.nome_completo }}
+                    {% if form.nome_completo.errors %}<ul class="errorlist">{% for error in form.nome_completo.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.email.id_for_label }}">Email:</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<ul class="errorlist">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.telefone.id_for_label }}">Telefone (somente números, com DDD):</label>
+                    {{ form.telefone }}
+                    {% if form.telefone.errors %}<ul class="errorlist">{% for error in form.telefone.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                 <div>
+                    <label for="{{ form.data_nascimento.id_for_label }}">Data de Nascimento:</label>
+                    {{ form.data_nascimento }}
+                    {% if form.data_nascimento.errors %}<ul class="errorlist">{% for error in form.data_nascimento.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.cpf.id_for_label }}">CPF (somente números):</label>
+                    {{ form.cpf }}
+                    {% if form.cpf.errors %}<ul class="errorlist">{% for error in form.cpf.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.password.id_for_label }}">Senha:</label>
+                    {{ form.password }}
+                    {% if form.password.help_text %}<small style="display: block; margin-top: -10px; margin-bottom: 10px; color: #555;">{{ form.password.help_text|safe }}</small>{% endif %}
+                    {% if form.password.errors %}<ul class="errorlist">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.password2.id_for_label }}">Confirmar Senha:</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}<ul class="errorlist">{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <button type="submit">Cadastrar</button>
+            </form>
+            <a href="{% url 'login' %}" class="link-button">Já tem uma conta? Faça login</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 1961 - {% now "Y" %} Centro Espírita Beneficente União do Vegetal - Núcleo Natal. Rua Lote 35 a (Chacara Grande Navio) Nisia Floresta - RN, 59.164-000</p>
+    </footer>
+</body>
+</html>

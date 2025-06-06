@@ -1,0 +1,214 @@
+{# filepath: c:\Users\jerff_xm9xnz6\OneDrive\VS Code\Projects\SociosCasaDaUniao\templates\schedule_event.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agendar Evento{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Agendar Evento</h1>
+
+    <div class="event-type-buttons">
+        <button type="button" data-event-type="Sessão" style="background-color: blue;">Sessão</button>
+        <button type="button" data-event-type="Mutirão" style="background-color: green;">Mutirão</button>
+        <button type="button" data-event-type="Preparo" style="background-color: orange;">Preparo</button>
+        <button type="button" data-event-type="Evento" style="background-color: violet;">Evento</button>
+    </div>
+
+    <form method="post" id="event-form" style="display: none;">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.event_type.id_for_label }}">Evento:</label>
+            {{ form.event_type }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.date.id_for_label }}">Data e Hora:</label>
+            {{ form.date }}
+            {{ form.time }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.leader.id_for_label }}">Dirigente:</label>
+            {{ form.leader }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.assistant.id_for_label }}">Assistente:</label>
+            {{ form.assistant }}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.details.id_for_label }}">Detalhes:</label>
+            {{ form.details }}
+            <small class="form-text text-muted">Máximo de 500 caracteres. Caracteres restantes: <span id="details-count">500</span></small>
+        </div>
+
+        <div class="form-group">
+            <label>Escalas:</label>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Escala</th>
+                        <th>Pessoas</th>
+                    </tr>
+                </thead>
+                <tbody id="scales-table-body">
+                    <!-- Existing scales will be dynamically added here -->
+                </tbody>
+            </table>
+            <div class="add-scale-item">
+                <select id="scale-select">
+                    <option value="">Selecione</option>
+                    <!-- Populate with available scales -->
+                </select>
+                <input type="number" id="people-needed" value="1" min="1" max="10">
+                <button type="button" id="add-scale-button">Adicionar</button>
+            </div>
+            <div class="suggested-scales">
+                <p>Sugestões:</p>
+                <label><input type="checkbox" value="Lavagem dos Copos" data-people="1"> Lavagem dos Copos (1)</label><br>
+                <label><input type="checkbox" value="Preparo do Lanche" data-people="1"> Preparo do Lanche (1)</label><br>
+                <label><input type="checkbox" value="Recolhimento do Lixo" data-people="1"> Recolhimento do Lixo (1)</label>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const eventTypeButtons = document.querySelectorAll('.event-type-buttons button');
+        const eventTypeInput = document.querySelector('#id_event_type');
+        const eventForm = document.querySelector('#event-form');
+        const detailsInput = document.querySelector('#id_details');
+        const detailsCount = document.querySelector('#details-count');
+        const scalesTableBody = document.querySelector('#scales-table-body');
+        const scaleSelect = document.querySelector('#scale-select');
+        const peopleNeededInput = document.querySelector('#people-needed');
+        const addScaleButton = document.querySelector('#add-scale-button');
+        const suggestedScales = document.querySelectorAll('.suggested-scales input[type="checkbox"]');
+
+        // Event type button functionality
+        eventTypeButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const eventType = this.dataset.event-type;
+                eventTypeInput.value = eventType;
+                eventTypeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                eventForm.style.display = 'block'; // Show the form
+            });
+        });
+
+        // Details character count
+        detailsInput.addEventListener('input', function () {
+            const remaining = 500 - this.value.length;
+            detailsCount.textContent = remaining;
+        });
+
+        // Add scale item to table
+        addScaleButton.addEventListener('click', function () {
+            const scale = scaleSelect.value;
+            const people = peopleNeededInput.value;
+
+            if (scale && people) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${scale}</td>
+                    <td>${people}</td>
+                    <td><button type="button" class="remove-scale">Remover</button></td>
+                `;
+                scalesTableBody.appendChild(row);
+                scaleSelect.value = '';
+                peopleNeededInput.value = 1;
+            }
+        });
+
+        // Remove scale item from table
+        scalesTableBody.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-scale')) {
+                event.target.closest('tr').remove();
+            }
+        });
+
+        // Suggested scales functionality
+        suggestedScales.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    const scale = this.value;
+                    const people = this.dataset.people;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${scale}</td>
+                        <td>${people}</td>
+                        <td><button type="button" class="remove-scale">Remover</button></td>
+                    `;
+                    scalesTableBody.appendChild(row);
+                } else {
+                    // Remove the scale if unchecked (implementation depends on how you identify the row)
+                    const scaleToRemove = this.value;
+                    const rows = scalesTableBody.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        if (row.querySelector('td').textContent === scaleToRemove) {
+                            row.remove();
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .event-type-buttons {
+        display: flex;
+        justify-content: center; /* Center buttons horizontally */
+        flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+        margin-bottom: 20px;
+    }
+
+    .event-type-buttons button {
+        width: calc(40% - 10px); /* Two buttons per line, 80% total width with spacing */
+        margin: 5px; /* Add some spacing between buttons */
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+
+    /* Media query for smaller screens to display buttons in a vertical list */
+    @media (max-width: 576px) {
+        .event-type-buttons {
+            flex-direction: column; /* Stack buttons vertically */
+            align-items: center; /* Center buttons horizontally */
+        }
+
+        .event-type-buttons button {
+            width: 80%; /* Use full width on smaller screens */
+            margin: 5px 0; /* Adjust margins for vertical spacing */
+        }
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+</style>
+{% endblock %}

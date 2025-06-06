@@ -151,18 +151,17 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Para coletar arquivos estáticos em produção
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'), # Se você tiver uma pasta 'static' global no projeto
+    BASE_DIR / "static", 
 ]
 
-# Media files (arquivos enviados pelos usuários)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# Media files (User-uploaded content)
+MEDIA_URL = '/media/' # URL base para servir arquivos de mídia
+MEDIA_ROOT = BASE_DIR / 'media' # Diretório no sistema de arquivos onde os arquivos de mídia são armazenados
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -186,32 +185,12 @@ REST_FRAMEWORK = {
 
 # Simple JWT settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Tempo de vida do token de acesso
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Tempo de vida do token de atualização
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
-
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY, # Usa a mesma SECRET_KEY do Django
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
-
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
-
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token de acesso válido por 60 minutos
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Token de atualização válido por 1 dia
+    'ROTATE_REFRESH_TOKENS': True,                  # Gera um novo refresh token ao renovar o token de acesso
+    'BLACKLIST_AFTER_ROTATION': True,               # Invalida o refresh token antigo após a rotação
+    'AUTH_HEADER_TYPES': ('Bearer',),               # Define o prefixo do cabeçalho de autorização
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
-
-    'JTI_CLAIM': 'jti',
-
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
 # CORS settings
@@ -299,9 +278,9 @@ else:
     }
 
 # Configurações de Autenticação para Django Templates (não JWT)
-LOGIN_URL = '/'  # URL para redirecionar usuários não autenticados (index.html)
-LOGIN_REDIRECT_URL = 'core:home'  # URL para redirecionar após login bem-sucedido
-LOGOUT_REDIRECT_URL = '/'  # URL para redirecionar após logout (index.html)
+LOGIN_URL = 'login'  # Nome da rota para a página de login (definida em backend/urls.py)
+LOGIN_REDIRECT_URL = 'core_home'  # Alterado de 'core:home' para o nome global da rota
+LOGOUT_REDIRECT_URL = 'login'  # URL para redirecionar após logout (definida em backend/urls.py como 'index' que redireciona para login)
 
 AUTHENTICATION_BACKENDS = [
     'backend.accounts.backends.PhoneAuthBackend',  # Nosso backend customizado para login por telefone

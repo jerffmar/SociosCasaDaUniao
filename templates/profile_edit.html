@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Perfil - {{ block.super }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-edit-container {
+        max-width: 700px;
+        margin: 20px auto;
+        padding: 25px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .profile-edit-container h2 {
+        text-align: center;
+        color: #00447C;
+        margin-bottom: 25px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="date"],
+    .form-group input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 0.95em;
+    }
+    .form-group input[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+    .profile-picture-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+        border: 2px solid #00447C;
+    }
+    .btn-save-profile {
+        background-color: #0056b3;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+        width: 100%;
+        transition: background-color 0.2s;
+    }
+    .btn-save-profile:hover {
+        background-color: #004494;
+    }
+    .message {
+        padding: 10px;
+        margin-top: 15px;
+        border-radius: 4px;
+        text-align: center;
+        display: none;
+    }
+    .message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-edit-container">
+    <h2>Editar Perfil</h2>
+    <form id="profileEditForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group" style="text-align: center;">
+            <img id="profilePicturePreview" src="{% static 'core/images/default_profile.png' %}" alt="Foto do Perfil" class="profile-picture-preview">
+            <br>
+            <label for="profile_picture">Alterar Foto do Perfil:</label>
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+        </div>
+
+        <div class="form-group">
+            <label for="firstName">Nome:</label>
+            <input type="text" id="firstName" name="first_name" required>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Sobrenome:</label>
+            <input type="text" id="lastName" name="last_name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" readonly>
+        </div>
+        <div class="form-group">
+            <label for="telefone">Telefone:</label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" required>
+        </div>
+        <div class="form-group">
+            <label for="dataNascimento">Data de Nascimento:</label>
+            <input type="date" id="dataNascimento" name="data_nascimento" required>
+        </div>
+        <div class="form-group">
+            <label for="cpf">CPF:</label>
+            <input type="text" id="cpf" name="cpf" readonly>
+        </div>
+        <div class="form-group">
+            <label for="cargo">Cargo:</label>
+            <input type="text" id="cargo" name="cargo" readonly>
+        </div>
+        <div class="form-group">
+            <label for="grau">Grau:</label>
+            <input type="text" id="grau" name="grau" readonly>
+        </div>
+        <div class="form-group">
+            <label for="equipe">Equipe:</label>
+            <input type="text" id="equipe" name="equipe" readonly>
+        </div>
+
+        <button type="submit" class="btn-save-profile">Salvar Alterações</button>
+        <p class="message" id="profileMessage"></p>
+    </form>
+</div>
+
+<script>
+    // Definindo API_ACCOUNTS_BASE_URL e csrftoken como no index.html
+    const API_BASE_URL = 'http://127.0.0.1:8000';
+    const API_ACCOUNTS_BASE_URL = `${API_BASE_URL}/api/accounts`;
+    const API_PROFILE_URL = `${API_ACCOUNTS_BASE_URL}/profile/`;
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileForm = document.getElementById('profileEditForm');
+        const profileMessage = document.getElementById('profileMessage');
+        const profilePicturePreview = document.getElementById('profilePicturePreview');
+        const profilePictureInput = document.getElementById('profile_picture');
+
+        // Carregar dados do perfil
+        async function loadProfileData() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                displayProfileMessage('Você precisa estar logado para editar o perfil.', 'error');
+                // Opcional: redirecionar para login
+                // window.location.href = "{% url 'login' %}"; 
+                return;
+            }
+
+            try {
+                const response = await fetch(API_PROFILE_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken 
+                    }
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    document.getElementById('firstName').value = userData.first_name || '';
+                    document.getElementById('lastName').value = userData.last_name || '';
+                    document.getElementById('email').value = userData.email || '';
+                    document.getElementById('telefone').value = userData.telefone || '';
+                    document.getElementById('dataNascimento').value = userData.data_nascimento || '';
+                    document.getElementById('cpf').value = userData.cpf || '';
+                    document.getElementById('cargo').value = userData.cargo || 'Não definido';
+                    document.getElementById('grau').value = userData.grau || 'Não definido';
+                    document.getElementById('equipe').value = userData.equipe || 'Não definida';
+                    
+                    if (userData.profile_picture) {
+                        profilePicturePreview.src = userData.profile_picture;
+                    } else {
+                        profilePicturePreview.src = "{% static 'core/images/default_profile.png' %}";
+                    }
+                } else {
+                    const errorData = await response.json();
+                    displayProfileMessage(errorData.detail || 'Erro ao carregar dados do perfil.', 'error');
+                    if (response.status === 401) { // Token inválido/expirado
+                        // Opcional: redirecionar para login
+                        // window.location.href = "{% url 'login' %}";
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
+                displayProfileMessage('Erro de conexão ao carregar perfil.', 'error');
+            }
+        }
+
+        loadProfileData();
+
+        // Preview da imagem de perfil
+        if (profilePictureInput) {
+            profilePictureInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePicturePreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Submeter formulário
+        if (profileForm) {
+            profileForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                clearProfileMessage();
+
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    displayProfileMessage('Sessão expirada. Faça login novamente.', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('first_name', document.getElementById('firstName').value);
+                formData.append('last_name', document.getElementById('lastName').value);
+                formData.append('telefone', document.getElementById('telefone').value.replace(/\D/g, ''));
+                formData.append('data_nascimento', document.getElementById('dataNascimento').value);
+                
+                // Adiciona a foto de perfil apenas se um novo arquivo foi selecionado
+                if (profilePictureInput.files[0]) {
+                    formData.append('profile_picture', profilePictureInput.files[0]);
+                } else if (profilePictureInput.value === '' && profilePicturePreview.src.includes('default_profile.png')) {
+                    // Se o campo está vazio e a imagem é a padrão, não envia nada (mantém a atual ou nenhuma)
+                    // Se o usuário quiser remover a foto, uma lógica explícita seria necessária (ex: um botão "Remover foto")
+                    // ou enviar 'null' se a API suportar. Por simplicidade, não enviamos se não houver alteração.
+                }
+
+
+                try {
+                    const response = await fetch(API_PROFILE_URL, {
+                        method: 'PATCH', // ou 'PUT'
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            // 'Content-Type': 'multipart/form-data' é definido automaticamente pelo browser com FormData
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const updatedData = await response.json();
+                        displayProfileMessage('Perfil atualizado com sucesso!', 'success');
+                        // Atualizar a imagem de preview se ela foi alterada e retornada pela API
+                        if (updatedData.profile_picture) {
+                            profilePicturePreview.src = updatedData.profile_picture;
+                        }
+                        // Opcional: recarregar os dados para garantir consistência
+                        // loadProfileData(); 
+                    } else {
+                        const errorData = await response.json();
+                        let errorMessage = 'Erro ao atualizar perfil.';
+                        if (errorData) {
+                            errorMessage = Object.values(errorData).flat().join(' ');
+                        }
+                        displayProfileMessage(errorMessage, 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao atualizar perfil:', error);
+                    displayProfileMessage('Erro de conexão ao atualizar perfil.', 'error');
+                }
+            });
+        }
+
+        function displayProfileMessage(message, type) {
+            if (profileMessage) {
+                profileMessage.textContent = message;
+                profileMessage.className = `message ${type}`;
+                profileMessage.style.display = 'block';
+            }
+        }
+
+        function clearProfileMessage() {
+            if (profileMessage) {
+                profileMessage.style.display = 'none';
+                profileMessage.textContent = '';
+                profileMessage.className = 'message';
+            }
+        }
+    });
+</script>
+{% endblock %}

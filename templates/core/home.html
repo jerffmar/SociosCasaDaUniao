@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Página Inicial - {{ block.super }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Estilos específicos para home.html, se necessário. 
+       A maior parte dos estilos da sidebar e layout geral foram movidos para base.html */
+    .home-content-wrapper { /* Novo wrapper para o conteúdo específico da home */
+        /* Se precisar de estilos específicos para o conteúdo da home, adicione aqui */
+    }
+    .main-content-area h2 { /* Estilo já está em base.html, mas pode ser sobrescrito se necessário */
+        color: #00447C;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #00447C;
+        padding-bottom: 10px;
+    }
+    .content-grid {
+        display: flex;
+        gap: 25px; /* Espaço entre calendário e detalhes */
+    }
+    .calendar-container {
+        flex: 3; /* Calendário ocupa mais espaço */
+    }
+    .event-details-container {
+        flex: 2; /* Detalhes do evento */
+    }
+    .balloon {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+    }
+    .balloon h4 {
+        color: #0056b3;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    .placeholder-text {
+        color: #6c757d;
+        text-align: center;
+        padding: 40px 20px;
+        border: 2px dashed #ced4da;
+        border-radius: 6px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-content-wrapper"> <!-- Conteúdo da home agora dentro deste wrapper -->
+    <h2>Calendário de Atividades</h2>
+    
+    <div class="balloon">
+        <p>Este é o seu painel principal. O calendário abaixo exibirá os eventos agendados. Clique em uma data com evento para ver os detalhes ao lado.</p>
+    </div>
+
+    <div class="content-grid">
+        <div class="calendar-container balloon">
+            <h4>Calendário do Mês</h4>
+            <div id="calendarWidget"></div>
+        </div>
+        <div class="event-details-container balloon">
+            <h4>Detalhes do Evento</h4>
+            <div id="eventDetails" class="placeholder-text">
+                <p>Selecione um evento no calendário para ver os detalhes, ou as informações do próximo evento serão exibidas aqui.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function pad(n) { return n < 10 ? '0' + n : n; }
+    function formatDate(date) {
+        return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+    }
+    function formatDateBr(dateStr) {
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    const calendarWidget = document.getElementById('calendarWidget');
+    const eventDetails = document.getElementById('eventDetails');
+
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    let eventsByDay = {};
+
+    function renderCalendar(month, year) {
+        let firstDay = new Date(year, month, 1).getDay();
+        let daysInMonth = new Date(year, month + 1, 0).getDate();
+        let weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        let html = `
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" id="prevMonthBtn">&lt;</button>
+                <h4>${new Date(year, month).toLocaleString('pt-BR', { month: 'long' }).replace(/^./, c => c.toUpperCase())} ${year}</h4>
+                <button class="calendar-nav-btn" id="nextMonthBtn">&gt;</button>
+            </div>
+            <table class="calendar">
+                <thead>
+                    <tr>${weekDays.map(d => `<th>${d}</th>`).join('')}</tr>
+                </thead>
+                <tbody>
+        `;
+        let date = 1;
+        let started = false;
+        for (let i = 0; i < 6; i++) {
+            html += '<tr>';
+            for (let j = 0; j < 7; j++) {
+                if (!started && j === (firstDay === 0 ? 6 : firstDay - 1)) started = true;
+                if (!started) {
+                    html += `<td class="other-month"></td>`;
+                } else if (date > daysInMonth) {
+                    html += `<td class="other-month"></td>`;
+                } else {
+                    let dayStr = `${year}-${pad(month + 1)}-${pad(date)}`;
+                    let isToday = (date === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+                    let hasEvent = eventsByDay[dayStr] && eventsByDay[dayStr].length > 0;
+                    html += `<td class="${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}" data-date="${dayStr}">
+                        <span class="day-number">${date}</span>
+                        ${hasEvent ? `<span class="event-marker">•</span>` : ''}
+                    </td>`;
+                    date++;
+                }
+            }
+            html += '</tr>';
+            if (date > daysInMonth) break;
+        }
+        html += '</tbody></table>';
+        calendarWidget.innerHTML = html;
+
+        document.getElementById('prevMonthBtn').onclick = function () {
+            if (currentMonth === 0) {
+                currentMonth = 11; currentYear--;
+            } else {
+                currentMonth--;
+            }
+            fetchAndRender();
+        };
+        document.getElementById('nextMonthBtn').onclick = function () {
+            if (currentMonth === 11) {
+                currentMonth = 0; currentYear++;
+            } else {
+                currentMonth++;
+            }
+            fetchAndRender();
+        };
+
+        document.querySelectorAll('.calendar td.has-event').forEach(td => {
+            td.addEventListener('click', function () {
+                showEventDetails(this.dataset.date);
+            });
+        });
+    }
+
+    function showEventDetails(dateStr) {
+        const events = eventsByDay[dateStr];
+        if (!events || events.length === 0) {
+            eventDetails.innerHTML = '<p>Nenhum evento para esta data.</p>';
+            return;
+        }
+        eventDetails.innerHTML = events.map(ev => `
+            <p><strong>Data:</strong> ${formatDateBr(dateStr)}</p>
+            <p><strong>Hora:</strong> ${ev.time}</p>
+            <p><strong>Evento:</strong> ${ev.title}</p>
+            <p><strong>Equipe:</strong> ${ev.team || '-'}</p>
+            <p><strong>Escala:</strong> ${ev.scale_items && ev.scale_items.length ? ev.scale_items.join(', ') : '-'}</p>
+            <p><strong>Lanche:</strong> ${ev.snack_items && ev.snack_items.length ? ev.snack_items.join(', ') : '-'}</p>
+            <p><strong>Descrição:</strong> ${ev.description || '-'}</p>
+            ${ev.can_confirm_presence ? `
+                <p><strong>Presença:</strong> <input type="checkbox" id="confirmPresence"> Confirmar Presença</p>
+            ` : ''}
+        `).join('<hr>');
+    }
+
+    function showNextEventOrDefault() {
+        const todayStr = formatDate(today);
+        let nextEventDate = null;
+        for (let d in eventsByDay) {
+            if (d >= todayStr && eventsByDay[d] && eventsByDay[d].length > 0) {
+                nextEventDate = d;
+                break;
+            }
+        }
+        if (nextEventDate) {
+            showEventDetails(nextEventDate);
+        } else {
+            eventDetails.innerHTML = `<p>Selecione um evento no calendário para ver os detalhes, ou as informações do próximo evento serão exibidas aqui.</p>`;
+        }
+    }
+
+    function fetchAndRender() {
+        fetch(`/app/api/events/?year=${currentYear}&month=${currentMonth + 1}`)
+            .then(resp => resp.json())
+            .then(data => {
+                eventsByDay = data;
+                renderCalendar(currentMonth, currentYear);
+                showNextEventOrDefault();
+            })
+            .catch(() => {
+                eventsByDay = {};
+                renderCalendar(currentMonth, currentYear);
+                eventDetails.innerHTML = `<p>Erro ao carregar eventos.</p>`;
+            });
+    }
+
+    fetchAndRender();
+});
+</script>
+{% endblock %}

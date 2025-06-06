@@ -1,0 +1,56 @@
+
+
+Página Inicial (/index)
+
+
+
+Imagino a página home do site como uma simples página de login, composta por um balão central contendo a logo da instituição, os campos "Telefone" e "Senha", os botões "Login","Cadastre-se" e "Recuperar Acesso".
+
+
+No cabeçalho do site, deve haver "Centro Espirita Beneficente União do Vegetal - Núcleo Natal"
+
+
+No Rodapé, deve haver escrito as informações "© 1961 a 2025 - Centro Espírita Beneficente União do Vegetal - Núcleo Natal. Rua Lote 35 a (Chacara Grande Navio) Nisia Floresta - RN, 59.164-000".
+
+
+Além da página "Cadastre-se" e "Recuperar acesso", esta é a única página visível para usuários não autenticados.
+
+
+Página Home (/home)
+
+
+
+A página home deve ser ser restrita a usuários autenticados. Preciso que haja redirecionamento de usuários não autenticados para a página inicial. Na página inicial, deverá haver um painel lateral com ícone de perfil, que ao ser clicado, revela o perfil do usuário logado, composto por sua foto de perfil em balão redondo e os seguintes menus e submenus:
+
+
+
+Meu Perfil (abaixo da foto):
+Editar perfil - Ao clicar neste menu, o conteúdo da página exibirá as informações do perfil do usuário. Os dados pessoais Nome, Telefone, Gênero (Masculino ou Feminino), Data de Nascimento, CPF poderão ser editados pelo próprio usuário. Os dados Cargo, Grau e Equipe serão atribuidos automaticamente como "Nenhum" e só poderão ser modificados por usuários de cargos com privilégios administrativos. Os cargos com privilégios administrativos são "Mestre Representante","Mestre-Assistente","Presidente". Os usuários poderão ter até 3 cargos.
+
+
+Atividades:
+Calendário - Este é o conteúdo padrão da página home após o login. Deverá ser composto por dois balões, um contendo um calendário do mês atual com as sessões agendadas na parte central esquerda. O usuário poderá clicar nas datas se houver alguma atividade agendada na data selecionada, o balão do lado direito do calendário deverá exibir as informações (Data,Hora,Evento(Sessão,Mutirão,Outro),Equipe,Escala,Lanche e Presença). Se a Data do evento for posterior a data atual, O Campo Presença deverá possuir uma caixa de seleção escrito "confirmar presença". Após o usuário confirmar presença, se a equipe do usuário for a mesma do evento em questão, os campos Escala e Lanche deverão apresentar a mensagem "Ainda não selecionado. Escolha um item:" e um menu dropdown com as Atividades e Lanches ainda não selecionados por outro usuário.
+Minha Equipe - O conteúdo está vinculado ao atributo Equipe do perfil do usuário. As possíveis são "Amarela","Verde" ou "Nenhum". Ao clicar em "Minha Equipe", o conteúdo da página deve exibir um balão central com o título "Equipe <Nome_da_Equipe>" e um subtítulo escrito "Atividades de <data_de_inicio> a <data_de_encerramento>", seguido por uma tabela com as colunas Nome e Grau. Se a equipe for "Nenhum", o balão deverá conter apenas "Usuário não cadastrado em nenhuma equipe."
+Escalas - Essa página deve conter abas horizontais com os títulos das atividades cadastradas na página "Editar Escalas". Ao clicar, a aba deverá exibir os itens Descrição, Período, Horário de Início, Horário de Término e Nível.
+Agendar Evento (Visível somente a Mestre Assistente) - Esta pagina devera exibir quatro grandes botões com os nomes "Sessão","Mutirão","Preparo" e "Evento". Ao clicar em algum, haverá um formulário com o os campos "Evento" (Campo de texto bloqueado e preechido com o botao clicado anteriormente) , "Data e Hora" (Menu Calendário interativo), Dirigente (Menu Drop-down com a lista dos nomes dos sócios e última opção como "Visitante"), Assistente (Menu Drop-down com a lista dos nomes dos sócios, última opção deverá ser "Visitante"), Detalhes (Campo de texto com até 500 caracteres, com contador de caracteres), Escalas ( Tabela com as colunas Escala e Pessoas, na coluna escala haverá uma lista de itens selecionáveis por um menu drop-down escrito "Selecione" da lista de Escalas. Ao selecionar o item, o item selecionado será exibido acima do menu de seleção com uma caixa de exclusão para permitir a remoção se necessário. Na coluna Pessoas, haverá um campo editável para inserção de número inteiro de 1 a 10 podendo ser digitados ou selecionável em um menu dropdown. O valor padrão será 1 no momento adição de algum item na coluna Escala. Por padrão, haverá sugestões de itens pré-selecionados, sendo eles "Lavagem dos Copos, Preparo do Lanche e Recolhimento do Lixo", com o valor 1 pré selecionado na coluna Pessoas e editável.
+Editar Escalas(Visível somente a Mestre Assistente ou Orgã) - Aqui deverá haver um formulário com o título "Adicionar Escala" e os itens Nome, Descrição, Horário de Início, Horário de Término, Período e Nível. O Nome é o nome da escala, com até 30 caracteres. Descrição é uma breve descrição da atividade com até 300 caracteres e contador de caracteres no rodapé do campo. Horário de Início e Horário de Término são campos selecionáveis de tempo no formato HH:MM, podendo também ser digitados mas com validador de preenchimento. Período é um campo opcional com as opções "Pré-sessão", "Pós-sessão", "Durante a Sessão" ou "N/A". Nível é uma escala de 1 a 10 campo que descreve a dificuldade e riscos envolvidos numa atividade. A atribuição dos níveis deve ser avaliada pela equipe de segurança do trabalho. O objetivo é limitar que pessoas idosas ou crianças selecionem atividades de alto nível.
+Editar Equipes (Visível somente a Mestre Assistente ou Orgã)- Aqui constará 3 balões dispostos lado a lado, com tabelas semelhantes a da página Minha Equipe. Na coluna "Equipe", haverá um menu dropdown em cada linha para que seja possível mudar a equipe do usuário em questão. Ao selecionar uma equipe diferente da atual, o usuário deverá ser movido para a nova tabela em tempo real. No topo de cada balão deverá um título no formato "<Nome da Equipe> - <Quantidade_de_Membros>"
+Rifas:
+Rifas
+Cadastrar Rifa
+Caronas:
+Buscar carona
+Oferecer carona
+Assistência (Visível e Acessível somente a membros do cargo Mestre Assistente e Mestre Representante.)
+Quadro de Sócios - Aqui haverá uma tabela com todos os usuários cadastrados, os dados pessoais do sócio e as colunas Cargo, Equipe e Grau. A Coluna Cargo permite a seleção de até 3 cargos em uma lista. Ao selecionar, o cargo aparece acima do menu dropdown com um ícone em X do lado esquerdo para permitir a remoção do cargo. A Coluna equipe possuirá um menu dropdown com as possíveis equipes e a coluna Grau possuirá os valores "Nenhum", "Sócio", "Corpo Instrutivo", "Conselho" e "Mestre".
+Relatório de Eventos - Aqui deverá haver uma lista com todos os eventos realizados, os membros que participaram, as atividades desempenhadas e contribuições dos sócios.
+
+
+Cabeçalho e rodapé deverão permanecer iguais ao da página index.
+
+O conteúdo da página deverão ser um calendário do mês atual com as datas das sessões agendadas. Ao lado do calendário, um balão com informações da próxima sessão por padrão. Ao clicar nas sessões agendadas no calendário, as informações devem mudar para as da respectiva sessão selecionada.
+
+
+
+
+
