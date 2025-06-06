@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Escalas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Editar Escalas</h1>
+
+    <h2>Escalas Existentes</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Dificuldade</th>
+                <th>Risco</th>
+                <th>Previsão de Duração</th>
+                <th>Descrição da Atividade</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for escala in escalas %}
+            <tr>
+                <td><span id="titulo_{{ escala.id }}">{{ escala.titulo }}</span><input type="text" class="form-control" id="edit_titulo_{{ escala.id }}" value="{{ escala.titulo }}" style="display:none;"></td>
+                <td><span id="dificuldade_{{ escala.id }}">{{ escala.dificuldade }}</span><input type="text" class="form-control" id="edit_dificuldade_{{ escala.id }}" value="{{ escala.dificuldade }}" style="display:none;"></td>
+                <td><span id="risco_{{ escala.id }}">{{ escala.risco }}</span><input type="text" class="form-control" id="edit_risco_{{ escala.id }}" value="{{ escala.risco }}" style="display:none;"></td>
+                <td><span id="previsao_duracao_{{ escala.id }}">{{ escala.previsao_duracao }}</span><input type="text" class="form-control" id="edit_previsao_duracao_{{ escala.id }}" value="{{ escala.previsao_duracao }}" style="display:none;"></td>
+                <td><span id="descricao_atividade_{{ escala.id }}">{{ escala.descricao_atividade }}</span><input type="text" class="form-control" id="edit_descricao_atividade_{{ escala.id }}" value="{{ escala.descricao_atividade }}" style="display:none;"></td>
+                <td>
+                    <button class="btn btn-primary edit-btn" data-id="{{ escala.id }}">Editar</button>
+                    <button class="btn btn-success save-btn" data-id="{{ escala.id }}" style="display:none;">Salvar</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Adicionar Escala</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.titulo.id_for_label }}">Título:</label>
+            {{ form.titulo }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.dificuldade.id_for_label }}">Dificuldade:</label>
+            {{ form.dificuldade }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.risco.id_for_label }}">Risco:</label>
+            {{ form.risco }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.previsao_duracao.id_for_label }}">Previsão de Duração:</label>
+            {{ form.previsao_duracao }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.descricao_atividade.id_for_label }}">Descrição da Atividade:</label>
+            {{ form.descricao_atividade }}
+            <small class="form-text text-muted">Caracteres restantes: <span id="details-count">500</span></small>
+        </div>
+        <button type="submit" class="btn btn-primary">Criar</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editButtons = document.querySelectorAll('.edit-btn');
+        const saveButtons = document.querySelectorAll('.save-btn');
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;
+                document.getElementById(`titulo_${id}`).style.display = 'none';
+                document.getElementById(`dificuldade_${id}`).style.display = 'none';
+                document.getElementById(`risco_${id}`).style.display = 'none';
+                document.getElementById(`previsao_duracao_${id}`).style.display = 'none';
+                document.getElementById(`descricao_atividade_${id}`).style.display = 'none';
+
+                document.getElementById(`edit_titulo_${id}`).style.display = 'block';
+                document.getElementById(`edit_dificuldade_${id}`).style.display = 'block';
+                document.getElementById(`edit_risco_${id}`).style.display = 'block';
+                document.getElementById(`edit_previsao_duracao_${id}`).style.display = 'block';
+                document.getElementById(`edit_descricao_atividade_${id}`).style.display = 'block';
+
+                this.style.display = 'none';
+                document.querySelector(`.save-btn[data-id="${id}"]`).style.display = 'inline-block';
+            });
+        });
+
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;
+                // Aqui você pode adicionar a lógica para salvar os dados editados
+                // usando AJAX para enviar os dados para o backend
+                console.log(`Salvando escala com ID: ${id}`);
+
+                document.getElementById(`titulo_${id}`).style.display = 'inline-block';
+                document.getElementById(`dificuldade_${id}`).style.display = 'inline-block';
+                document.getElementById(`risco_${id}`).style.display = 'inline-block';
+                document.getElementById(`previsao_duracao_${id}`).style.display = 'inline-block';
+                document.getElementById(`descricao_atividade_${id}`).style.display = 'inline-block';
+
+                document.getElementById(`edit_titulo_${id}`).style.display = 'none';
+                document.getElementById(`edit_dificuldade_${id}`).style.display = 'none';
+                document.getElementById(`edit_risco_${id}`).style.display = 'none';
+                document.getElementById(`edit_previsao_duracao_${id}`).style.display = 'none';
+                document.getElementById(`edit_descricao_atividade_${id}`).style.display = 'none';
+
+                this.style.display = 'none';
+                document.querySelector(`.edit-btn[data-id="${id}"]`).style.display = 'inline-block';
+            });
+        });
+    });
+</script>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+
+    h2 {
+        margin-top: 30px;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .table th,
+    .table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

@@ -21,7 +21,10 @@ class CustomUserAdmin(UserAdmin):
 
     # Método para exibir o valor legível do campo 'cargo'
     def display_cargo(self, obj):
-        return obj.get_cargo_display()
+        # Se cargo for ManyToManyField
+        return ", ".join([cargo.nome for cargo in obj.cargos.all()]) if hasattr(obj, 'cargos') else '-'
+        # Se cargo for CharField com choices
+        # return obj.get_cargo_display()
     display_cargo.short_description = 'Cargo'
 
     # Adicione 'telefone' e 'cpf' aos campos exibidos na lista de usuários
@@ -37,10 +40,10 @@ class CustomUserAdmin(UserAdmin):
     # Exemplo básico, você precisará ajustar conforme os campos do seu CustomUser:
     fieldsets = (
         (None, {'fields': ('telefone', 'password')}), # 'telefone' é o seu USERNAME_FIELD
-        ('Informações Pessoais', {'fields': ('first_name', 'last_name', 'email', 'data_nascimento', 'cpf', 'genero', 'foto_perfil')}), # Adicionado 'foto_perfil'
+        ('Informações Pessoais', {'fields': ('first_name', 'last_name', 'email', 'data_nascimento', 'cpf', 'genero', 'profile_picture')}), # Adicionado 'profile_picture'
         ('Permissões', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Datas Importantes', {'fields': ('last_login', 'date_joined')}),
-        ('Informações Adicionais', {'fields': ('equipe', 'grau', 'cargo')}), # Adicionado 'cargo'
+        ('Informações Adicionais', {'fields': ('equipe', 'grau', 'cargos')}), # Alterado 'cargo' para 'cargos'
     )
     # Se 'telefone' é seu USERNAME_FIELD, ele já deve estar no primeiro fieldset.
     # Se você tem um campo 'username' tradicional e 'telefone' é um campo adicional, ajuste.

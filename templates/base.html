@@ -258,7 +258,7 @@
                                 <li><a href="{% url 'activities:schedule_event' %}">Agendar Evento</a></li>
                                 {% endif %}
                                 {% if perms.activities.change_escala %} 
-                                <li><a href="#">Editar Escalas</a></li>
+                                <li><a href="{% url 'activities:escala_list' %}">Editar Escalas</a></li>
                                 {% endif %}
                                 {% if perms.activities.change_equipe %}
                                 <li><a href="#">Editar Equipes</a></li>

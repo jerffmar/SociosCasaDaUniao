@@ -13,3 +13,27 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+
+class Escala(models.Model):
+    titulo = models.CharField(max_length=200)
+    dificuldade = models.CharField(
+        max_length=10,
+        choices=[
+            ('Baixa', 'Baixa'),
+            ('Media', 'Média'),
+            ('Alta', 'Alta'),
+        ]
+    )
+    risco = models.CharField(
+        max_length=10,
+        choices=[
+            ('Baixo', 'Baixo'),
+            ('Medio', 'Médio'),
+            ('Alto', 'Alto'),
+        ]
+    )
+    previsao_duracao = models.TimeField()
+    descricao_atividade = models.TextField(max_length=500)
+
+    def __str__(self):
+        return self.titulo

@@ -143,8 +143,8 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         # Define a representação em string do objeto CustomUser
-        # Retorna o telefone, que agora é o USERNAME_FIELD
-        return self.telefone
+        # Retorna o nome completo em vez do telefone
+        return f"{self.first_name} {self.last_name}"
 
     # Método auxiliar para verificar se o usuário possui privilégios administrativos
     def has_administrative_privileges(self):
