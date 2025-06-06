@@ -92,9 +92,24 @@
             button.addEventListener('click', function () {
                 const eventType = this.dataset.event-type;
                 eventTypeInput.value = eventType;
+                
+                // Remove a classe 'active' de todos os botões
                 eventTypeButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Adiciona a classe 'active' ao botão clicado
                 this.classList.add('active');
-                eventForm.style.display = 'block'; // Show the form
+
+                // Exibe o formulário com uma animação suave
+                eventForm.style.display = 'block';
+                eventForm.style.opacity = 0;
+                let opacity = 0;
+                const intervalId = setInterval(function() {
+                    opacity += 0.1;
+                    eventForm.style.opacity = opacity;
+                    if (opacity >= 1) {
+                        clearInterval(intervalId);
+                    }
+                }, 20); // Ajuste o intervalo para controlar a velocidade da animação
             });
         });
 
@@ -175,6 +190,12 @@
         color: white;
         cursor: pointer;
         box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        transition: background-color 0.3s ease; /* Adiciona uma transição suave */
+    }
+
+    .event-type-buttons button.active {
+        background-color: #0056b3; /* Cor de destaque para o botão ativo */
+        /* Outros estilos para indicar que o botão está ativo */
     }
 
     /* Media query for smaller screens to display buttons in a vertical list */

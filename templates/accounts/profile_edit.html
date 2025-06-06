@@ -132,13 +132,14 @@
             <label for="{{ form.profile_picture.id_for_label }}">Foto do Perfil:</label>
             {% if form.instance.profile_picture %}
                 <img src="{{ form.instance.profile_picture.url }}" alt="Foto do Perfil Atual" class="profile-picture-preview">
-                <p style="font-size:0.9em; margin-bottom: 5px;">Atual: {{ form.instance.profile_picture.name|cut:"profile_pics/" }}</p>
-                {% if form.profile_picture_clear %} {# Verifica se o campo de limpar existe no form #}
+                {#<p style="font-size:0.9em; margin-bottom: 5px;">Atual: {{ form.instance.profile_picture.name|cut:"profile_pics/" }}</p>#}
+                
+                 <p style="font-size:0.9em; margin-top: 5px;">Alterar/Enviar nova foto:</p>
+                 {% if form.profile_picture_clear %} {# Verifica se o campo de limpar existe no form #}
                     <label for="{{ form.profile_picture_clear.id_for_label }}" style="font-weight:normal; font-size:0.9em;">
                         {{ form.profile_picture_clear }} Remover foto atual
                     </label>
                 {% endif %}
-                 <p style="font-size:0.9em; margin-top: 5px;">Alterar/Enviar nova foto:</p>
             {% else %}
                 <p style="font-size:0.9em;">Nenhuma foto de perfil enviada.</p>
             {% endif %}
@@ -212,8 +213,7 @@
             {% if form.equipe.errors %}<ul class="errorlist">{% for error in form.equipe.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
         </div>
         {% endif %}
-
-        {# Se você quiser renderizar campos não explicitamente listados acima, pode usar form.as_p ou iterar:
+        {# Iterando sobre os outros campos do formulário, exceto os que já foram tratados #}
            {% for field in form %}
                {% if field.name not in "nome_completo,email,telefone,data_nascimento,cpf,profile_picture,genero,cargo,grau,equipe" %}
                    <div class="form-group">
@@ -224,7 +224,7 @@
                    </div>
                {% endif %}
            {% endfor %}
-        #}
+    
 
         <div class="form-actions">
             <a href="{% url 'core_home' %}" class="btn-back">Voltar</a> {# Alterado para link <a> e URL da home #}
